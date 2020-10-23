@@ -1,8 +1,8 @@
-# vuln1.py
+# vuln2.py
 
-# PoC for SQL injection on th /friends endpoint to change fields in the `Users` table
+# PoC for SQL injection on the /update_profile endpoint to change fields in the `Users` table
 #
-# the search bar allows for SQL injections which allow to read the entire DB
+# The update profile section fields to change the user's name, password, bio and image allow us to change values in the `Users` table
 
 from tools import *
 import sys

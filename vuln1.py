@@ -1,8 +1,8 @@
 # vuln1.py
 
-# PoC for SQL injection on th /friends endpoint
+# PoC for SQL injection on the /friends endpoint
 #
-# the search bar allows for SQL injections which allow to read the entire DB
+# The search bar allows for SQL injections which allow to read the entire DB
 
 from tools import *
 import sys
