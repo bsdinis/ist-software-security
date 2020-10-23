@@ -139,5 +139,19 @@ def update_user(session: FaceFiveSession, correct_password: str, username: str, 
 
     return r
 
+def create_post(session: FaceFiveSession, content: str, postType="Public"):
+    assert len(content) != 0, 'Content cannot be empty'
+    print(content)
+
+    post = {
+        'content': content,
+        'type': postType
+    }
+
+    r = session.post('create_post', data=post)
+    preety_print_html(r.text)
+
+    return r
+
 def preety_print_html(html: str):
     print(_html2text.handle(html))
