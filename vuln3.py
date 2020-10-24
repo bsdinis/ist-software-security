@@ -16,11 +16,12 @@ session = FaceFiveSession(url)
 
 user = 'test'
 passwd = 'testpasswd'
-content = '<script>window.location="https://www.google.com"</script>'
+content = '<script>alert(1);</script>'
 
 reset_image(session)
 register(session, user, passwd)
 
+#post = script(session, content)
 post = create_post(session, content)
 print(post.text)
 

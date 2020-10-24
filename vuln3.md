@@ -9,7 +9,7 @@
 1. Register
 2. Login
 3. Navigate to the `'/create_post'` endpoint
-4. Insert the following text in the `Content` text field: `<script window.location="https://www.google.com"></script>`
+4. Insert the following text in the `Content` text field: `<script>window.location="https://www.google.com"</script>`
 5. Set visibility to `Public`
 6. Access the main page by pressing `FaceFive` at the top left corner of the page
 
