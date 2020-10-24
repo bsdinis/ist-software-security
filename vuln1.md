@@ -1,4 +1,4 @@
-# Vulnerability 1: SQL Injection in login form allows to login as admin
+# Vulnerability 1: SQL Injection in search field in /friends
 
 - Vulnerability: SQL Injection
 - Where: `search bar` in search my friends bar

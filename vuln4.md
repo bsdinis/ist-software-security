@@ -13,7 +13,7 @@
 5. Set visibility to `Public`
 6. Press the `Create Post` button
 7. Press the `Edit this post` button on the main page, under the post you created
-8. Enter the following text in the `Content` field: `',id=1,type='Public',content='ThisIsNewContent' WHERE id=1 --`
+8. Enter the following text in the `Content` field: `',id=1,type='Public',content='ThisIsNewContent' WHERE id=1 -- `
 9. Press the `Create Post` button
 10. Notice that you edited another post, that shows at the top of the page with the new content
 
