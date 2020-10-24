@@ -153,5 +153,20 @@ def create_post(session: FaceFiveSession, content: str, postType="Public"):
 
     return r
 
+def edit_post(session: FaceFiveSession, identifier: int, content: str, postType="Public"):
+    assert len(content) != 0, 'Content cannot be empty'
+    print(content)
+
+    post = {
+        'id': identifier,
+        'content': content,
+        'type': postType
+    }
+
+    r = session.post('edit_post', data=post)
+    preety_print_html(r.text)
+
+    return r
+
 def preety_print_html(html: str):
     print(_html2text.handle(html))

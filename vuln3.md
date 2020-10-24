@@ -1,4 +1,4 @@
-# Vulnerability 2: XSS in /create_post
+# Vulnerability 3: XSS in /create_post
 
 - Vulnerability: XSS
 - Where: `Content` input text field in /create_post.
