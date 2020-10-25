@@ -1,14 +1,14 @@
 # Vulnerability 1: SQL Injection in search field in /friends
 
 - Vulnerability: SQL Injection
-- Where: `search bar` in search my friends bar
+- Where: `/friends` endpoint: `search bar` in search my friends bar
 - Impact: Arbitrary `SELECT` queries on the database
 
 ## Steps to reproduce
 
 1. Register
 2. Login
-3. Navigate to the `'/friends'` endpoint
+3. Navigate to the `/friends` endpoint
 4. Search for `' union select username, password, 3, 4, 5 from Users; -- `
 5. Collect all the passwords
 

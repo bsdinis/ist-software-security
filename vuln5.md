@@ -1,7 +1,7 @@
 # Vulnerability 4: SQL Injection in /login
 
 - Vulnerability: SQL Injection
-- Where: `Username` field in login form
+- Where: `Username` field in `/login` form
 - Impact: Allows attackers to login as any user, if they know a username
 
 ## Steps to reproduce

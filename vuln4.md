@@ -1,14 +1,14 @@
 # Vulnerability 4: SQL Injection in /edit_post
 
 - Vulnerability: SQL Injection
-- Where: `Content` field in /edit_post
+- Where: `Content` field in `/edit_post`
 - Impact: Allows attackers to change any post's visibility and content (created by any users)
 
 ## Steps to reproduce
 
 1. Register
 2. Login
-3. Navigate to the `'/create_post'` endpoint
+3. Navigate to the `/create_post` endpoint
 4. Write text in `Content` field
 5. Set visibility to `Public`
 6. Press the `Create Post` button
