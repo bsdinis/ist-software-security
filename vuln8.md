@@ -4,6 +4,11 @@
 - Where: `Content` field on `/create_post`
 - Impact: can leak contents one by one
 
+Note: there is a similar vulnerability on several endpoints:
+ - `/login` (username field)
+ - `/register` (username field)
+ - `/profile` (Name/About field): although it cannot reference the Users table since it is changing it.
+
 ## Steps to reproduce
 
 1. Login as a user
