@@ -171,18 +171,23 @@ def start_driver():
 
     return driver
 
+def driver_user_login(driver: webdriver):
+    element = driver.find_element_by_name("username")
+    element.clear()
+    element.send_keys("test")
+    element = driver.find_element_by_name("password")
+    element.clear()
+    element.send_keys("testpasswd")
+    element = driver.find_element_by_tag_name("button").click()
+
+
 def create_post_script(session: FaceFiveSession, content: str):
 
     driver = start_driver()
     try:
         driver.get(session.url)
-        element = driver.find_element_by_name("username")
-        element.clear()
-        element.send_keys("test")
-        element = driver.find_element_by_name("password")
-        element.clear()
-        element.send_keys("testpasswd")
-        element = driver.find_element_by_tag_name("button").click()
+        driver_user_login(driver)
+
         element = driver.find_element_by_link_text("New Post").click()
         element = driver.find_element_by_name("content")
         element.clear()
@@ -192,6 +197,8 @@ def create_post_script(session: FaceFiveSession, content: str):
         alert = driver.switch_to_alert()
         text = alert.text
         alert.accept()
+        alert = driver.switch_to_alert()
+        alert.accept()
         return text
     except TimeoutException as e:
         print("Could not connect to %s" % session.url)
@@ -200,3 +207,46 @@ def create_post_script(session: FaceFiveSession, content: str):
         raise e
     finally: 
        driver.close()
+
+def update_user_script(session: FaceFiveSession, correct_password: str, username: str, new_password = None, about = None, name = None, photo = None):
+    assert correct_password is not None, 'The user password is required'
+    driver = start_driver()
+
+    try:
+        driver.get(session.url)
+        driver_user_login(driver)
+
+        element = driver.find_element_by_link_text("Profile (test)").click()
+
+        if name is not None:
+            element = driver.find_element_by_id("nameInput")
+            element.clear()
+            element.send_keys(name)
+
+        if new_password is not None:
+            element = driver.find_element_by_id("newPasswordInput")
+            element.clear()
+            element.send_keys(new_password)
+
+        if about is not None:
+            element = driver.find_element_by_id("aboutInput")
+            element.clear()
+            element.send_keys(about)
+        
+        element = driver.find_element_by_id("currentpasswordInput")
+        element.clear()
+        element.send_keys(correct_password)
+    
+        element = driver.find_element_by_tag_name("button").click()
+    except TimeoutException as e:
+        print("Could not connect to %s" % session.url)
+        raise e
+    except Exception as e:
+        raise e
+    finally: 
+        driver.close()
+
+def send_friend_request(session: FaceFiveSession, friend_username: str):
+    assert friend_username is not None, 'A username is required'
+    driver = start_driver()
+

