@@ -1,4 +1,4 @@
-# vuln1.py
+# vuln8.py
 
 # PoC for SQL injection on the /friends endpoint
 #
