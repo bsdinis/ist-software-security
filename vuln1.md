@@ -14,6 +14,8 @@
 
 [(POC)](vuln1.py)
 
+Note: since the number of friends found is displayed it would also be possible to do a blind SQL injection if the results themselves stopped being showed.
+
 ## Impact
 
 Severe. This allows the attacker to know all the credentials to all users (including possible admins) and to learn the schema of the DB:
