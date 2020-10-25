@@ -142,22 +142,6 @@ def update_user(session: FaceFiveSession, correct_password: str, username: str, 
 
     return r
 
-def create_post(session: FaceFiveSession, content: str, postType="Public"):
-    assert len(content) != 0, 'Content cannot be empty'
-    print(content)
-
-    post = {
-        'content': content,
-        'type': postType
-    }
-
-    r = session.post('create_post', data=post)
-    preety_print_html(r.text)
-
-    script(session)
-
-    return r
-
 def edit_post(session: FaceFiveSession, identifier: int, content: str, postType="Public"):
     assert len(content) != 0, 'Content cannot be empty'
     print(content)
@@ -181,28 +165,38 @@ def start_driver():
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
-    driver = webdriver.Chrome(chrome_options=chrome_options)
-    #driver.set_page_load_timeout(5)
-    #driver.set_script_timeout(5)
+    driver = webdriver.Chrome('./chromedriver')
+    driver.set_page_load_timeout(5)
+    driver.set_script_timeout(5)
 
     return driver
 
-def script(session: FaceFiveSession):
+def script(session: FaceFiveSession, content: str):
+
     driver = start_driver()
     try:
-        driver.get("http://68e327e55ef49b75ccd392ac75311e4ec6965f6e8fe813b4d94bf660ff18.project.ssof.rnl.tecnico.ulisboa.pt")
-
-        print(driver.find_elements_by_class_name("border"))
-
+        driver.get(session.url)
+        element = driver.find_element_by_name("username")
+        element.clear()
+        element.send_keys("test")
+        element = driver.find_element_by_name("password")
+        element.clear()
+        element.send_keys("testpasswd")
+        element = driver.find_element_by_tag_name("button").click()
+        element = driver.find_element_by_link_text("New Post").click()
+        element = driver.find_element_by_name("content")
+        element.clear()
+        element.send_keys(content)
+        element = driver.find_element_by_tag_name("button").click()
+        
         alert = driver.switch_to_alert()
         assert "1" in alert.text
-        # print alert.text
-        return alert
+        print(alert.text)
 
     except TimeoutException as e:
-        print("Could not connect to %s" % "http://68e327e55ef49b75ccd392ac75311e4ec6965f6e8fe813b4d94bf660ff18.project.ssof.rnl.tecnico.ulisboa.pt" )
+        print("Could not connect to %s" % session.url)
         raise e
     except Exception as e:
         raise e
-    finally:
-        driver.close()
+    #finally: 
+     #  driver.close()
