@@ -171,7 +171,7 @@ def start_driver():
 
     return driver
 
-def script(session: FaceFiveSession, content: str):
+def create_post_script(session: FaceFiveSession, content: str):
 
     driver = start_driver()
     try:
@@ -190,13 +190,13 @@ def script(session: FaceFiveSession, content: str):
         element = driver.find_element_by_tag_name("button").click()
         
         alert = driver.switch_to_alert()
-        assert "1" in alert.text
-        print(alert.text)
-
+        text = alert.text
+        alert.accept()
+        return text
     except TimeoutException as e:
         print("Could not connect to %s" % session.url)
         raise e
     except Exception as e:
         raise e
-    #finally: 
-     #  driver.close()
+    finally: 
+       driver.close()

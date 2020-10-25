@@ -21,5 +21,5 @@ content = '<script>alert(1);</script>'
 reset_image(session)
 register(session, user, passwd)
 
-script(session,content)
-
+alertText = create_post_script(session, content)
+assert "1" in alertText
