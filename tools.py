@@ -122,7 +122,6 @@ def get_schema(session: FaceFiveSession, tables: str):
 
 def create_post(session: FaceFiveSession, content: str, postType="Public"):
     assert len(content) != 0, 'Content cannot be empty'
-    print(content)
 
     post = {
         'content': content,
@@ -130,14 +129,12 @@ def create_post(session: FaceFiveSession, content: str, postType="Public"):
     }
 
     r = session.post('create_post', data=post)
-    preety_print_html(r.text)
 
     return r
 
 
 def edit_post(session: FaceFiveSession, identifier: int, content: str, postType="Public"):
     assert len(content) != 0, 'Content cannot be empty'
-    print(content)
 
     post = {
         'id': identifier,
@@ -146,7 +143,6 @@ def edit_post(session: FaceFiveSession, identifier: int, content: str, postType=
     }
 
     r = session.post('edit_post', data=post)
-    preety_print_html(r.text)
 
     return r
 
@@ -187,6 +183,31 @@ def create_post_script(session: FaceFiveSession, content: str):
         text = alert.text
         alert.accept()
         alert = driver.switch_to_alert()
+        alert.accept()
+        return text
+    except TimeoutException as e:
+        print("Could not connect to %s" % session.url)
+        raise e
+    except Exception as e:
+        raise e
+    finally:
+       driver.close()
+
+def register_alert(session: FaceFiveSession, username: str, password: str):
+    driver = start_driver()
+    try:
+        driver.get(session.url+'/register')
+        element = driver.find_element_by_name("username")
+        element.clear()
+        element.send_keys(username)
+        element = driver.find_element_by_name("password")
+        element.clear()
+        element.send_keys(password)
+        element = driver.find_element_by_tag_name("button").click()
+
+        alert = driver.switch_to_alert()
+        text = alert.text
+        alert.accept()
         alert.accept()
         return text
     except TimeoutException as e:

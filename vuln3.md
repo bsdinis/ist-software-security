@@ -17,5 +17,5 @@
 
 ## Impact
 
-Severe. This allows the attacker to redirect users to vulnerable websites which allow the attacker to get information on the
+Medium. This allows the attacker to redirect users to vulnerable websites which allow the attacker to get information on the
 victims, including, but not limited to their cookies.

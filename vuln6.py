@@ -15,13 +15,16 @@ url = sys.argv[1]
 session = FaceFiveSession(url)
 
 user = 'test'
+user2 = 'test2'
 passwd = 'testpasswd'
 content = '<script>alert(5);</script>'
 
 reset_image(session)
 register(session, user, passwd)
 update_user_script(session, passwd, user, name=content)
+create_post(session, content)
+logout(session)
 
-alertText = create_post_script(session, content)
+alertText = register_alert(session, passwd, user)
 assert "5" in alertText
 
