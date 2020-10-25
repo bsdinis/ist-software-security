@@ -25,7 +25,8 @@ users = select_query(session, 'Users', 'username', 'password')
 user_1, password = users[0]
 
 new_password = 'maga2020!'
-update_user(session, passwd, user_1, password = new_password)
+update_user_script(session, passwd, user_1, new_password = new_password)
 
 logout(session)
+print('Logging in as {} with password {}'.format(user_1, password))
 assert login(session, user_1, new_password).status_code == 200

