@@ -120,6 +120,21 @@ def get_schema(session: FaceFiveSession, tables: str):
 
     return schema
 
+def create_post(session: FaceFiveSession, content: str, postType="Public"):
+    assert len(content) != 0, 'Content cannot be empty'
+    print(content)
+
+    post = {
+        'content': content,
+        'type': postType
+    }
+
+    r = session.post('create_post', data=post)
+    preety_print_html(r.text)
+
+    return r
+
+
 def edit_post(session: FaceFiveSession, identifier: int, content: str, postType="Public"):
     assert len(content) != 0, 'Content cannot be empty'
     print(content)
