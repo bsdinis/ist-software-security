@@ -11,7 +11,7 @@
 
 
 Note: there seems to be a WAF on the server controlling which payloads are valid (which seems a bit contrived, but we're not offering any creative commentary, this is a play). As such, only `DROP` payloads seem to be allowed.
-In addition to this, this exploit can be replicated in `/friends`, `/login`, `/edit_post`, `/create_post`. In the last two endpoints, the payload is different, similar to the following string: `SomeContent', 'Public'); DROP TABLE Posts -- `
+In addition to this, this exploit can be replicated in `/friends`, `/login`, `/edit_post`, `/profile`, `/create_post`. In the last endpoint, the payload is different, similar to the following string: `SomeContent', 'Public'); DROP TABLE Posts -- `.
 
 [(POC)](vuln7.py)
 
