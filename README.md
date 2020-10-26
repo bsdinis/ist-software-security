@@ -3,7 +3,7 @@
 Group Image available [here](http://68e327e55ef49b75ccd392ac75311e4ec6965f6e8fe813b4d94bf660ff18.project.ssof.rnl.tecnico.ulisboa.pt/)
 
 - Vulnerability 1: SQL Injection in search field in /friends [(link)](vuln1.md)
-- Vulnerability 2: SQL Injection in /update_profile [(link)](vuln2.md)
+- Vulnerability 2: SQL Injection in /profile [(link)](vuln2.md)
 - Vulnerability 3: XSS in /create_post [(link)](vuln3.md)
 - Vulnerability 4: SQL Injection in /edit_post [(link)](vuln4.md)
 - Vulnerability 5: SQL Injection in /login [(link)](vuln5.md)
