@@ -206,7 +206,6 @@ def register_alert(session: FaceFiveSession, username: str, password: str):
         alert = driver.switch_to_alert()
         text = alert.text
         alert.accept()
-        alert.accept()
         return text
     except TimeoutException as e:
         print("Could not connect to %s" % session.url)
@@ -254,7 +253,30 @@ def update_user_script(session: FaceFiveSession, correct_password: str, username
     finally:
         driver.close()
 
-def send_friend_request(session: FaceFiveSession, friend_username: str):
-    assert friend_username is not None, 'A username is required'
+def search_friends_script(session: FaceFiveSession, payload: str):
+    assert len(payload) != 0, 'Payload cannot be empty.'
+
     driver = start_driver()
 
+    try:
+        driver.get(session.url)
+        driver_user_login(driver)
+
+        element = driver.find_element_by_link_text("My Friends").click()
+
+        element = driver.find_element_by_id("search")
+        element.clear()
+        element.send_keys(payload)
+
+        element = driver.find_element_by_tag_name("button").click()
+        alert = driver.switch_to_alert()
+        text = alert.text
+        alert.accept()
+        return text
+    except TimeoutException as e:
+        print("Could not connect to %s" % session.url)
+        raise e
+    except Exception as e:
+        raise e
+    finally:
+        driver.close()

@@ -11,6 +11,7 @@ Group Image available [here](http://68e327e55ef49b75ccd392ac75311e4ec6965f6e8fe8
 - Vulnerability 7: Arbitrary SQL in /register [(link)](vuln7.md)
 - Vulnerability 8: SQL leak inside /create_post [(link)](vuln8.md)
 - Vulnerability 9: Authorization bypass on /edit_post [(link)](vuln9.md)
+- Vulnerability 10: SQL Injection and XSS in search field in /friends [(link)](vuln10.md)
 
 ## Notes
 

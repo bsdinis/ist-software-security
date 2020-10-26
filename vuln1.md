@@ -18,7 +18,7 @@ Note: since the number of friends found is displayed it would also be possible t
 
 ## Impact
 
-Severe. This allows the attacker to know all the credentials to all users (including possible admins) and to learn the schema of the DB:
+Severe. This allows the attacker to know all the credentials to all users (including possible admins), the information stored in the DB tables, and to learn the schema of the DB:
 
 ```
 Friends(id int, username1 varchar(20), username2 varchar(20));
