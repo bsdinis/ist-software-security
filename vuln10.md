@@ -16,4 +16,4 @@
 
 ## Impact
 
-Medium. This allows the attacker to create a script in a sql injection attack.
+Medium. This allows the attacker to create a script in a sql injection attack. However, this will only affect the logged in user.
