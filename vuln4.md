@@ -21,4 +21,5 @@
 
 ## Impact
 
-Severe. This allows the attacker to change any post's visibility and content (created by any users).
+Severe. This allows the attacker to change any post's visibility and content (created by any users). It is possible to change the post's
+content to a script, that will run once that post is displayed in the main page.
