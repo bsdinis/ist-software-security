@@ -1,4 +1,4 @@
-# Vulnerability 4: SQL Injection in /login
+# Vulnerability 5: SQL Injection in /login
 
 - Vulnerability: SQL Injection
 - Where: `Username` field in `/login` form
