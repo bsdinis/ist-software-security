@@ -2,7 +2,15 @@
 
 Group Image available [here](http://68e327e55ef49b75ccd392ac75311e4ec6965f6e8fe813b4d94bf660ff18.project.ssof.rnl.tecnico.ulisboa.pt/)
 
-- Vulnerability 1: SQL Injection in `search my friends` bar allows to login as admin [(link)](vuln1.md)
+- Vulnerability 1: SQL Injection in search field in /friends [(link)](vuln1.md)
+- Vulnerability 2: SQL Injection in /update_profile [(link)](vuln2.md)
+- Vulnerability 3: XSS in /create_post [(link)](vuln3.md)
+- Vulnerability 4: SQL Injection in /edit_post [(link)](vuln4.md)
+- Vulnerability 5: SQL Injection in /login [(link)](vuln5.md)
+- Vulnerability 6: XSS in /profile [(link)](vuln6.md)
+- Vulnerability 7: Arbitrary SQL in /register [(link)](vuln7.md)
+- Vulnerability 8: SQL leak inside /create_post [(link)](vuln8.md)
+- Vulnerability 9: Authorization bypass on /edit_post [(link)](vuln9.md)
 
 ## Notes
 
