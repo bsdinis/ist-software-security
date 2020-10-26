@@ -182,8 +182,6 @@ def create_post_script(session: FaceFiveSession, content: str):
         alert = driver.switch_to_alert()
         text = alert.text
         alert.accept()
-        alert = driver.switch_to_alert()
-        alert.accept()
         return text
     except TimeoutException as e:
         print("Could not connect to %s" % session.url)
