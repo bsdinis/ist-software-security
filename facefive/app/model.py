@@ -23,12 +23,11 @@ def init_db():
                     photo varchar(255) DEFAULT '{}',
                     PRIMARY KEY (username)
                     );'''.format(app.config['default_photo']))
-
-    cur.execute('INSERT INTO Users(username, password, name, about) VALUES (%s, %s, %s, %s)', ('administrator', 'AVeryL33tPasswd', 'Admin', 'I have no friends.'))
-    cur.execute('INSERT INTO Users(username, password, name) VALUES (%s, %s, %s)', ('investor', 'benfica123', 'Mr. Smith'))
-    cur.execute('INSERT INTO Users(username, password, name, about) VALUES (%s, %s, %s, %s)', ('ssofadmin', 'SCP', 'SSofAdmin', 'A 12-year experienced sys-admin that has developed and secured this application.'))
-    cur.execute('DROP TABLE IF EXISTS Posts;')
-    cur.execute('''CREATE TABLE Posts (
+    cur.execute("INSERT INTO Users(username, password, name, about) VALUES (%s, %s, %s, %s)", ('administrator', 'AVeryL33tPasswd', "Admin", "I have no friends."))
+    cur.execute("INSERT INTO Users(username, password, name) VALUES (%s, %s, %s)", ('investor', 'benfica123', "Mr. Smith"))
+    cur.execute("INSERT INTO Users(username, password, name, about) VALUES (%s, %s, %s, %s)", ('ssofadmin', 'SCP', "SSofAdmin", "A 12-year experienced sys-admin that has developed and secured this application."))
+    cur.execute("DROP TABLE IF EXISTS Posts;")
+    cur.execute('''CREATE TABLE Posts ( 
                     id int(11) NOT NULL AUTO_INCREMENT,
                     author VARCHAR(20) NOT NULL,
                     content TEXT,
@@ -38,6 +37,7 @@ def init_db():
                     PRIMARY KEY (id),
                     FOREIGN KEY (author) REFERENCES Users(username)
                     );''')
+<<<<<<< HEAD
 
     cur.execute('INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)', ('administrator', 'No one will find that I have no secrets.', 'Private'))
     cur.execute('INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)', ('investor', 'This is a great platform', 'Public'))
@@ -49,6 +49,18 @@ def init_db():
     cur.execute('INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)', ('SSofAdmin', 'This one is also great. https://www.youtube.com/watch?v=oHg5SJYRHA0&', 'Public'))
     cur.execute('DROP TABLE IF EXISTS Friends;')
     cur.execute('''CREATE TABLE Friends (
+=======
+    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('administrator', 'No one will find that I have no secrets.', "Private"))
+    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('investor', 'This is a great platform', "Public"))
+    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('investor', 'Lets keep it for us but I believe that after this app Instagram is done', "Friends"))
+    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('investor', 'TikTok might also be done but do not want ot make this bold claim in Public', "Private"))
+    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('SSofAdmin', 'There are no problems with this app. It works perfectly', "Public"))
+    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('SSofAdmin', 'Cannot put this app running. Can any of my friends help me', "Friends"))
+    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('SSofAdmin', 'Just found a great new thing. Have a look at it. It might be of help. https://www.guru99.com/install-linux.html', "Public"))
+    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('SSofAdmin', 'This one is also great. https://www.youtube.com/watch?v=oHg5SJYRHA0&', "Public"))
+    cur.execute("DROP TABLE IF EXISTS Friends;")
+    cur.execute('''CREATE TABLE Friends ( 
+>>>>>>> e2fa9ee... Fixed bug related to editing posts.
                     id int(11) NOT NULL AUTO_INCREMENT,
                     username1 VARCHAR(20) NOT NULL,
                     username2 VARCHAR(20) NOT NULL,
@@ -56,9 +68,9 @@ def init_db():
                     FOREIGN KEY (username1) REFERENCES Users(username),
                     FOREIGN KEY (username2) REFERENCES Users(username)
                     );''')
-    cur.execute('INSERT INTO Friends(username1, username2) VALUES (%s, %s)', ('investor', 'SSofAdmin'))
-    cur.execute('DROP TABLE IF EXISTS FriendsRequests;')
-    cur.execute('''CREATE TABLE FriendsRequests (
+    cur.execute("INSERT INTO Friends(username1, username2) VALUES (%s, %s)", ('investor', "SSofAdmin"))
+    cur.execute("DROP TABLE IF EXISTS FriendsRequests;")
+    cur.execute('''CREATE TABLE FriendsRequests ( 
                     id int(11) NOT NULL AUTO_INCREMENT,
                     username1 VARCHAR(20) NOT NULL,
                     username2 VARCHAR(20) NOT NULL,
@@ -66,17 +78,18 @@ def init_db():
                     FOREIGN KEY (username1) REFERENCES Users(username),
                     FOREIGN KEY (username2) REFERENCES Users(username)
                     );''')
-    cur.execute('INSERT INTO Users(username, password, name, about) VALUES (%s, %s, %s, %s)', ('randomjoe1', '1', 'Random Joe Smith1', 'I am the real Random Joe'))
-    cur.execute('INSERT INTO Users(username, password, name) VALUES (%s, %s, %s)', ('randomjoe2', '2', 'Random Joe Smith2'))
-    cur.execute('INSERT INTO Users(username, password, name) VALUES (%s, %s, %s)', ('randomjoe3', '3', 'Random Joe Smith3'))
-    cur.execute('INSERT INTO Users(username, password, name) VALUES (%s, %s, %s)', ('randomjoe4', '4', 'Random Joe Smith4'))
-    cur.execute('INSERT INTO FriendsRequests(username1, username2) VALUES (%s, %s)', ('randomjoe1', 'investor'))
-    cur.execute('INSERT INTO FriendsRequests(username1, username2) VALUES (%s, %s)', ('randomjoe2', 'investor'))
-    cur.execute('INSERT INTO FriendsRequests(username1, username2) VALUES (%s, %s)', ('randomjoe3', 'investor'))
-    cur.execute('INSERT INTO FriendsRequests(username1, username2) VALUES (%s, %s)', ('randomjoe4', 'investor'))
-
+    cur.execute("INSERT INTO Users(username, password, name, about) VALUES (%s, %s, %s, %s)", ('randomjoe1', '1', "Random Joe Smith1", "I am the real Random Joe"))
+    cur.execute("INSERT INTO Users(username, password, name) VALUES (%s, %s, %s)", ('randomjoe2', '2', "Random Joe Smith2"))
+    cur.execute("INSERT INTO Users(username, password, name) VALUES (%s, %s, %s)", ('randomjoe3', '3', "Random Joe Smith3"))
+    cur.execute("INSERT INTO Users(username, password, name) VALUES (%s, %s, %s)", ('randomjoe4', '4', "Random Joe Smith4"))
+    cur.execute("INSERT INTO FriendsRequests(username1, username2) VALUES (%s, %s)", ('randomjoe1', "investor"))
+    cur.execute("INSERT INTO FriendsRequests(username1, username2) VALUES (%s, %s)", ('randomjoe2', "investor"))
+    cur.execute("INSERT INTO FriendsRequests(username1, username2) VALUES (%s, %s)", ('randomjoe3', "investor"))
+    cur.execute("INSERT INTO FriendsRequests(username1, username2) VALUES (%s, %s)", ('randomjoe4', "investor"))
+   
     mysql.connection.commit()
     cur.close()
+
 
 
 # SELECT QUERIES
@@ -180,14 +193,27 @@ def get_post(post_id):
         return None
 
 
+def get_post_author(post_id):
+    q = 'select author from Posts where id = %s'
+
+    logging.debug('get_post_author query: %s' % q)
+    data = get_all_results(q, (post_id,))
+
+    if len(data) == 1:
+        return data[0][0]
+    else:
+        logging.debug('get_post: Something wrong happened with (post_id):(%s)' % (post_id))
+        return None
+
+
 ##### Edits the post with the given post_id
-### in: post_id, new_content, type
-### out: True
-def edit_post(post_id, new_content, type):
-    q = 'update Posts set content = %s, type = %s, where id = %s'
+### in: post_id, new_content, post_type
+### out: True - success, False - failure
+def edit_post(post_id, new_content, post_type):
+    q = 'update Posts set content = %s, type = %s where id = %s'
 
     logging.debug('edit_post query: %s' % q)
-    commit_results(q, (new_content, type, post_id))
+    commit_results(q, (new_content, post_type, post_id))
     return True
 
 
