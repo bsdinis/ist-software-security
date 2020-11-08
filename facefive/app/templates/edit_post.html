@@ -11,10 +11,11 @@
         </div>
         <div class="col-6 bg-secondary">
             <form class="mb-3" action="/edit_post" method="post">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
               <fieldset>
                 <legend>Edit the Content for your post</legend>
                 <hr class="half-rule" color="grey" />
-                <input type="hidden" name="id" value= {{ post.id }} /> 
+                <input type="hidden" name="id" value= {{ post.id }} />
                 <div class="form-group">
                   <label for="contentArea">Content.</label>
                   <textarea class="form-control" name="content" id="contentArea" rows="10">{{ post.content }}</textarea>

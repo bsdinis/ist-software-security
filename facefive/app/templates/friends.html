@@ -9,6 +9,7 @@
             <center>
                 <!-- form for search -->
                 <form class="form-horizontal" action="/friends" method="get">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <fieldset>
                         <legend>Search My Friends</legend>
                         <div class="form-group">
