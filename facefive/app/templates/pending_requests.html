@@ -16,7 +16,7 @@
 
 <i>{{ friends_pending|length }} friendship requests need your answer</i><br><br>
   <!-- Friend requests -->
-  {% autoescape false %}
+  {% autoescape true %}
   {% for tentative_friend in friends_pending %}
     <!-- request -->
     <div class="row border border-dark rounded ml-1 mr-1" style="border-width:2px !important;">

@@ -54,10 +54,10 @@ def init_db():
     cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('investor', 'This is a great platform', "Public"))
     cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('investor', 'Lets keep it for us but I believe that after this app Instagram is done', "Friends"))
     cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('investor', 'TikTok might also be done but do not want ot make this bold claim in Public', "Private"))
-    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('SSofAdmin', 'There are no problems with this app. It works perfectly', "Public"))
-    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('SSofAdmin', 'Cannot put this app running. Can any of my friends help me', "Friends"))
-    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('SSofAdmin', 'Just found a great new thing. Have a look at it. It might be of help. https://www.guru99.com/install-linux.html', "Public"))
-    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('SSofAdmin', 'This one is also great. https://www.youtube.com/watch?v=oHg5SJYRHA0&', "Public"))
+    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('ssofadmin', 'There are no problems with this app. It works perfectly', "Public"))
+    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('ssofadmin', 'Cannot put this app running. Can any of my friends help me', "Friends"))
+    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('ssofadmin', 'Just found a great new thing. Have a look at it. It might be of help. https://www.guru99.com/install-linux.html', "Public"))
+    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('ssofadmin', 'This one is also great. https://www.youtube.com/watch?v=oHg5SJYRHA0&', "Public"))
     cur.execute("DROP TABLE IF EXISTS Friends;")
     cur.execute('''CREATE TABLE Friends ( 
 >>>>>>> e2fa9ee... Fixed bug related to editing posts.
@@ -286,7 +286,7 @@ def get_pending_requests(username):
 ### in: username, accept_friend (requester)
 ### out: True
 def accept_friend_request(username, accept_friend):
-    q = 'insert into friends (username1, username2) values (%s, %s)'
+    q = 'insert into Friends (username1, username2) values (%s, %s)'
 
     logging.debug('accept_friend_request query1: %s' % q)
     cur = mysql.connection.cursor()

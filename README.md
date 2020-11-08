@@ -1,4 +1,4 @@
-# Fix Report of Group XX
+# Fix Report of Group 23
 
 ## Phase 2 Deadline: 08Nov2020-23h59m)
 

@@ -261,7 +261,7 @@ def edit_post():
       
       try:
          if (model.get_post_author(post_id) != current_user.username):
-            return error("Unauthorized operation.")
+            return error("Unauthorized operation.(%s,%s)" % (model.get_post_author(post_id),current_user.username))
          post = model.get_post(post_id)
       except Exception as e:
          logging.debug('edit_post1: Found exception(%s)' % e)
@@ -280,7 +280,7 @@ def edit_post():
 
    try:
       if (model.get_post_author(post_id) != current_user.username):
-            return error("Unauthorized operation.")
+            return error("Unauthorized operation.(%s,%s)" % (model.get_post_author(post_id),current_user.username))
       new_post = model.edit_post(post_id, new_content, new_type)
    except Exception as e:
       logging.debug('edit_post2: Found exception(%s)' % e)
