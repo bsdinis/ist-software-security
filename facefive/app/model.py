@@ -37,30 +37,17 @@ def init_db():
                     PRIMARY KEY (id),
                     FOREIGN KEY (author) REFERENCES Users(username)
                     );''')
-<<<<<<< HEAD
 
     cur.execute('INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)', ('administrator', 'No one will find that I have no secrets.', 'Private'))
     cur.execute('INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)', ('investor', 'This is a great platform', 'Public'))
     cur.execute('INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)', ('investor', 'Lets keep it for us but I believe that after this app Instagram is done', 'Friends'))
     cur.execute('INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)', ('investor', 'TikTok might also be done but do not want ot make this bold claim in Public', 'Private'))
-    cur.execute('INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)', ('SSofAdmin', 'There are no problems with this app. It works perfectly', 'Public'))
-    cur.execute('INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)', ('SSofAdmin', 'Cannot put this app running. Can any of my friends help me', 'Friends'))
-    cur.execute('INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)', ('SSofAdmin', 'Just found a great new thing. Have a look at it. It might be of help. https://www.guru99.com/install-linux.html', 'Public'))
-    cur.execute('INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)', ('SSofAdmin', 'This one is also great. https://www.youtube.com/watch?v=oHg5SJYRHA0&', 'Public'))
+    cur.execute('INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)', ('ssofadmin', 'There are no problems with this app. It works perfectly', 'Public'))
+    cur.execute('INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)', ('ssofadmin', 'Cannot put this app running. Can any of my friends help me', 'Friends'))
+    cur.execute('INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)', ('ssofadmin', 'Just found a great new thing. Have a look at it. It might be of help. https://www.guru99.com/install-linux.html', 'Public'))
+    cur.execute('INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)', ('ssofadmin', 'This one is also great. https://www.youtube.com/watch?v=oHg5SJYRHA0&', 'Public'))
     cur.execute('DROP TABLE IF EXISTS Friends;')
     cur.execute('''CREATE TABLE Friends (
-=======
-    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('administrator', 'No one will find that I have no secrets.', "Private"))
-    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('investor', 'This is a great platform', "Public"))
-    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('investor', 'Lets keep it for us but I believe that after this app Instagram is done', "Friends"))
-    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('investor', 'TikTok might also be done but do not want ot make this bold claim in Public', "Private"))
-    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('ssofadmin', 'There are no problems with this app. It works perfectly', "Public"))
-    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('ssofadmin', 'Cannot put this app running. Can any of my friends help me', "Friends"))
-    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('ssofadmin', 'Just found a great new thing. Have a look at it. It might be of help. https://www.guru99.com/install-linux.html', "Public"))
-    cur.execute("INSERT INTO Posts(author, content, type) VALUES (%s, %s, %s)", ('ssofadmin', 'This one is also great. https://www.youtube.com/watch?v=oHg5SJYRHA0&', "Public"))
-    cur.execute("DROP TABLE IF EXISTS Friends;")
-    cur.execute('''CREATE TABLE Friends ( 
->>>>>>> e2fa9ee... Fixed bug related to editing posts.
                     id int(11) NOT NULL AUTO_INCREMENT,
                     username1 VARCHAR(20) NOT NULL,
                     username2 VARCHAR(20) NOT NULL,
