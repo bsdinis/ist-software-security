@@ -1,0 +1,40 @@
+<!-- 0 -->
+<!-- 
+NOTE:
+=======
+This does not contain an exploit that is accessed via an alias
+-->
+<html>
+<head>
+<title>Welcome!</title>
+</head>
+<body>
+Hi
+
+<script>
+function foo(p1, p2) {
+ var x = p1.f;
+ bar(x.g.t.substring(0,10));
+ var y = x.g;
+ y.t = p2.k; 
+}
+
+function bar(x) {
+ document.write(x); 
+}
+
+var a = new Object();
+a.f = new Object();
+a.f.g = new Object();
+a.f.g.t = new Object();
+var b = new Object();
+b.k = document.URL;
+
+foo(a, b)
+</script>
+
+<BR>
+Welcome to our system
+
+</body>
+</html>

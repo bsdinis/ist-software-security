@@ -1,0 +1,35 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to XSS. 
+
+SOURCE:
+    element.getAttribute [ret]
+    
+SINK:
+    document.domain
+-->
+<HTML>
+
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+
+<body>
+Hi
+
+<SCRIPT>
+function getattr()
+{
+    var attr = document.getElementById("test").getAttribute("title"); 
+    document.domain = attr; 
+}
+</SCRIPT>
+
+<BR>
+Welcome to our system
+<input type="button" onclick="getattr()" value="Question?" />
+<div id="test" title="foobar"></div>
+</body>
+</HTML>

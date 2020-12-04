@@ -1,0 +1,30 @@
+<!-- 0 -->
+<!-- 
+NOTE:
+=======
+No vulns because the toString of a node *should* be safe
+!-->
+
+<HTML>
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+<body>
+Hi
+
+<div id="DDD">
+taint
+</div>
+<SCRIPT>
+
+var t = document.getElementById("DDD");
+
+document.write(t);
+
+</SCRIPT>
+
+<BR>
+Welcome to our system
+</body>
+
+</HTML>

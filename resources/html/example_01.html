@@ -1,0 +1,49 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+-->
+<html>
+<head>
+<title>Welcome!</title>
+</head>
+<body>
+
+<div id="d1">
+</div>
+
+<div id="d2">
+&lt;b  onMouseOver='alert("hi");'&gt;Attack Me&lt;/b&gt;
+</div>
+
+<script>
+function Element() {
+ this.innerText = "http://ibm.com";
+}
+var el1 = document.getElementById("d1");
+function foo() {
+  var el2 = document.getElementById("d2");
+  function bar() {
+    var el3 = new Element();
+    var s = encodeURIComponent(el2.innerText);
+    document.write(s);                      
+    el1.innerHTML = el2.innerText;          //flow violation #1
+    
+    document.location = el3.innerText;  
+  }
+  bar();
+}
+foo();
+</script><br><script>
+function baz(a, b) {
+ a.f = document.URL; 
+ document.write(b.f);                       //flow violation #2
+}
+var x = new Object();
+baz(x, x);
+</script>
+
+<h1>Welcome to our system</h1>
+
+</body>
+</html>

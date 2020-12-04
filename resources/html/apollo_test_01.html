@@ -1,0 +1,18 @@
+<!-- 0 -->
+<!-- NOTE:
+=======
+-->
+
+<HTML>
+<HEAD><title>Topic View</title></HEAD>
+<BODY>
+<SCRIPT>
+var pos = document.URL.indexOf("topic=") + 5;
+var end = document.URL.indexOf("&");
+
+var name = document.URL.substring(pos, end);
+var sanitizedName = decodeURI(name);
+document.write('<H1> view of topic  ' +sanitizedName +' </H1>\\n');
+</SCRIPT>
+</BODY>
+</HTML>

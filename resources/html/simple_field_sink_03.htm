@@ -1,0 +1,28 @@
+<!-- 0 -->
+<!-- 
+NOTE:
+=======
+This HTML code is NOT vulnerable to a redirection problem. document.foo is not a sink
+!-->
+
+<HTML>
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+<body>
+Hi
+
+<SCRIPT>
+
+var t = document.getElementById("t");
+
+var k = "foo";
+
+document[k] = t;
+
+</SCRIPT>
+
+<BR>
+Welcome to our system
+</body>
+</HTML>

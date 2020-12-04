@@ -1,0 +1,35 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to Regex injection. 
+
+SOURCE:
+    document.location.search [ret]
+    
+SINK:
+    string.match() [Arg#2]
+-->
+<HTML>
+
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+
+<body>
+Hi
+
+<SCRIPT>
+function regex()
+{
+    var str = new String();
+    var matches = str.match(document.location.search);
+}
+</SCRIPT>
+
+<BR>
+Welcome to our system
+<input type="button" onclick="regex()" value="Question?" />
+<div id="test"></div>
+</body>
+</HTML>

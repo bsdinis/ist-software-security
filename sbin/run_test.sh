@@ -10,7 +10,7 @@ then
     exit 1
 fi
 
-test_dir="test/T23-*$1"
+test_dir=$(printf "test/T23-%02d" $1)
 echo -n "Running $(basename ${test_dir})... "
 python3 src/main.py ${test_dir}/input.json ${test_dir}/patterns.json
 diff -i -E -Z -b -w -B ${test_dir}/output.json ${test_dir}/input.output.json >/dev/null 2>/dev/null

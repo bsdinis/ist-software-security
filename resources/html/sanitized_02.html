@@ -1,0 +1,31 @@
+<!-- 0 -->
+<!-- 
+NOTE:
+=======
+This HTML code is NOT vulnerable to DOM XSS.
+It DOES NOT contains a very simple code with an document.URL as a source and document.write as a sink. It also checks to make sure
+all strings are NOT aliased-->
+
+<HTML>
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+<body>
+Hi
+
+<SCRIPT>
+var TEST = new String("FOO");
+
+var name = document.URL;
+var sanitizedName = encodeURI(name);
+document.write(sanitizedName);
+
+document.write(TEST);
+
+</SCRIPT>
+
+<BR>
+Welcome to our system
+</body>
+
+</HTML>

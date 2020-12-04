@@ -1,0 +1,37 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to url manipulation (ultimately unsanitized data is sent to a 3rd party web site).
+
+SOURCE:
+    prompt() [ret]
+    
+SINK:
+    window.location.replace()   [arg#2]
+-->
+<HTML>
+
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+
+<body>
+Hi
+
+<SCRIPT>
+function show_prompt()
+{
+    var name=prompt("Please enter the answer","");
+    if (name!=null && name!="")
+    {
+    	window.location.replace("http://www.example.com?name=" + name);
+    }
+}
+</SCRIPT>
+
+<BR>
+Welcome to our system
+<input type="button" onclick="show_prompt()" value="Question?" />
+</body>
+</HTML>
