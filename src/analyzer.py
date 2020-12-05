@@ -28,7 +28,6 @@ def analyze(program: AST, patterns: dict) -> List[Vulnerability]:
 	vulns.append(Vulnerability("Test",[],[],[]))
 	for vuln,pattern in patterns.items():
 		found_vulns = program.taint_analysis(pattern)
-		break
 		if (len(found_vulns) > 0):
 			for found_vuln in found_vulns:
 				vulns.append(Vulnerability(vuln,sources,sinks,sanitizers))
