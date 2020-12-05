@@ -7,23 +7,6 @@ convert json to an AST
 from typing import Any, Optional, Dict, List
 from models import Pattern
 
-def taint_propagate(node, spaces = ""):
-   
-    if (node.name == None):
-        print(spaces + node.type),
-    else:
-        print(spaces + node.type + " " + node.name),
-  
-    for key,childs in node.children.items():
-        if (isinstance(childs,dict)):
-            taint_propagate(childs,spaces+" ")
-        elif(isinstance(childs,list)):
-            for child in childs:
-                taint_propagate(child,spaces+" ")
-        elif(isinstance(childs,Node)):
-            taint_propagate(childs,spaces+" ")
-
-
 class Node:
     def __init__(self, type: str, name: Optional[str] = None, children: Dict[str, Any] = dict()):
         self.type = type
@@ -63,8 +46,27 @@ class Node:
         return cls(type, name=name, children=children)
 
 
-    def visit(self, f) -> Any:
-        f(self)
+    def visit(self, f, pattern) -> Any:
+        f(self,pattern)
+
+
+def taint_propagate(node: Node , pattern: Pattern, spaces: Optional[str] = "", vars: Optional[dict] = {}):
+   
+    if (node.name == None):
+        print(spaces + node.type)
+    else:
+        print(spaces + node.type + " " + node.name)
+    for key,childs in node.children.items():
+      #  if (node.type == "AssignmentExpression"):
+
+        if (isinstance(childs,dict)):
+            taint_propagate(childs,pattern,spaces+" ")
+        elif(isinstance(childs,list)):
+            for child in childs:
+                taint_propagate(child,pattern,spaces+" ")
+        elif(isinstance(childs,Node)):
+            taint_propagate(childs,pattern,spaces+" ")
+
 
 class AST:
     def __init__(self, root: Node):
@@ -80,7 +82,6 @@ class AST:
     
     def taint_analysis(self, pattern: Pattern) -> List:
         ''' detect all ilegal flows with a specific Pattern'''
-        vars = {}
-        self.root.visit(taint_propagate)
+        self.root.visit(taint_propagate,pattern)
         return []
 
