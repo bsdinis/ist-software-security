@@ -52,7 +52,6 @@ def basic_taint_analysis(
                 lvalue_aps = stmt['left'].get_lvalue_aps()
                 rvalue_aps = stmt['right'].get_tainted_sources(
                     tainted_aps, pattern)
-
                 logger.debug(stmt)
                 logger.debug(
                     '\tlvalue aps = {} (sink? {})'.format(
@@ -83,6 +82,7 @@ def basic_taint_analysis(
                 # only consider one level call, ie: all arguments are
                 # convertable to access paths or literals
                 callee_aps = stmt['callee'].get_rvalue_aps()
+                    
                 source_aps = set(
                     filter(
                         lambda x: x.is_source(pattern),

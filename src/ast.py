@@ -128,6 +128,7 @@ class Node:
 
         return set()
 
+    #TODO: Check for sinks and sanitizers on right side
     def get_tainted_sources(self,
                             tainted_aps: Dict[AccessPath,
                                               Set[AccessPath]],
@@ -149,9 +150,9 @@ class Node:
             'involved aps [{}]: {}'.format(
                 self,
                 '\t'.join(
-                    '({}, {})'.format(
+                    '({}, {}, {}, {})'.format(
                         ap,
-                        ap.is_source(pattern)) for ap in self.get_rvalue_aps())))
+                        ap.is_source(pattern), ap.is_sanitizer(pattern), ap.is_sink(pattern)) for ap in self.get_rvalue_aps())))
         return reduce(
             lambda a, b: a | b, map(
                     lambda y: ap_to_src_ap(y, tainted_aps, pattern), self.get_rvalue_aps()), set())

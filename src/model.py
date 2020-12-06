@@ -95,15 +95,6 @@ class AccessPath:
     def __ge__(self, other) -> bool:
         return not(self == other) and not (self <= other)
 
-    def is_sink(self, pattern: Pattern) -> bool:
-        # TODO: fix
-        # ```
-        # a = document
-        # is_sink(a.innerHTML, ...)
-        # ```
-
-        return any(self == AccessPath.from_str(s) for s in pattern.sinks)
-
     def is_potential_source(self, pattern: Pattern) -> bool:
         for s in pattern.sources:
             ap_s = AccessPath.from_str(s)
@@ -115,6 +106,21 @@ class AccessPath:
             ap_s = AccessPath.from_str(s)
             logger.debug('{} == {} ? {}'.format(ap_s, self, self == ap_s))
         return any(self == AccessPath.from_str(s) for s in pattern.sources)
+
+    def is_sanitizer(self, pattern: Pattern) -> bool:
+        for s in pattern.sanitizers:
+            ap_s = AccessPath.from_str(s)
+            logger.debug('{} == {} ? {}'.format(ap_s, self, self == ap_s))
+        return any(self == AccessPath.from_str(s) for s in pattern.sanitizers)
+
+    def is_sink(self, pattern: Pattern) -> bool:
+        # TODO: fix
+        # ```
+        # a = document
+        # is_sink(a.innerHTML, ...)
+        # ```
+
+        return any(self == AccessPath.from_str(s) for s in pattern.sinks)
 
     def __add__(self, other):
         return AccessPath(self.var, list(self.field_idents) +
