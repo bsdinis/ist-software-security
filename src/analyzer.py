@@ -74,6 +74,10 @@ def basic_taint_analysis(
 
                     if len(sink_aps) > 0 and len(source_aps) > 0:
                         vulns.add(gen_vuln(pattern, source_aps, sink_aps))
+                else:
+                    for ap in lvalue_aps:
+                        if ap in tainted_aps:
+                            del(tainted_aps[ap])
 
             elif stmt.type == 'CallExpression':
                 # only consider one level call, ie: all arguments are
