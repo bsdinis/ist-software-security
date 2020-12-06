@@ -1,0 +1,32 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to DOM XSS.
+It contains a vulnerable piece of code located at a always reachable condition segment.
+-->
+<HTML>
+
+<TITLE>Welcome!</TITLE>
+
+Hi
+
+<SCRIPT>
+
+var pos=document.URL.indexOf("name=")+5;
+var text = document.URL.substring(pos,document.URL.length);
+var value = 10;
+
+// In this case, the condition is always satisfied. there is an issue in the code below...
+if (value > 5) {
+	document.write(document.URL.substring(pos,document.URL.length));
+} else {
+	document.write("DefaultName");
+}
+
+</SCRIPT>
+
+<BR>
+Welcome to our system
+
+</HTML>

@@ -1,0 +1,26 @@
+<!-- 0 -->
+<!-- 
+NOTE:
+=======
+This HTML code is not vulnerable to DOM XSS.
+It contains a very simple code with an document.location.port as an untainted source and document.write as a sink. -->
+
+<HTML>
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+<body>
+Hi
+
+<SCRIPT>
+
+var t = document.location.port;
+
+document.write(t);
+
+</SCRIPT>
+
+<BR>
+Welcome to our system
+</body>
+</HTML>

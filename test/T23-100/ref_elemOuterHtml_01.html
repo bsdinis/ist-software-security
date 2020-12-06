@@ -1,0 +1,35 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to DOM XSS. Note, outerHTML is only available in MS IE.
+
+SOURCE:
+    document.referrer [ret]
+    
+SINK:
+    element.outerHtml
+-->
+<HTML>
+
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+
+<body>
+Hi
+
+<SCRIPT>
+function domxss()
+{
+    var divElem = document.getElementById('test');
+    divElem.outerHTML = document.referrer.toString();
+}
+</SCRIPT>
+
+<BR>
+Welcome to our system
+<input type="button" onclick="domxss()" value="Question?" />
+<div id="test"></div>
+</body>
+</HTML>

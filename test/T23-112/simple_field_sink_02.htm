@@ -1,0 +1,27 @@
+<!-- 0 -->
+<!-- 
+NOTE:
+=======
+This HTML code is NOT vulnerable to a redirection problem.
+!-->
+
+<HTML>
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+<body>
+Hi
+
+<SCRIPT>
+var t = document.getElementById("title");
+
+var s = escape(t);
+
+document.location.pathname = s;
+
+</SCRIPT>
+
+<BR>
+Welcome to our system
+</body>
+</HTML>

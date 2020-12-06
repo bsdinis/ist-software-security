@@ -1,0 +1,29 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to DOM XSS.
+It contains a very simple code with an document.URL as a source and document.writeln as a sink.
+-->
+<HTML>
+
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+<body>
+
+Hi
+
+<SCRIPT>
+
+var url = document.URL;
+
+document.writeln(url);
+
+</SCRIPT>
+
+<BR>
+Welcome to our system
+</body>
+
+</HTML>

@@ -1,0 +1,24 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to DOM XSS.
+It contains a call to eval(), which receives a string that is (partially) formed from the contents of document.URL (a source).
+-->
+<HTML>
+<head>
+<TITLE>Simple Eval Code!</TITLE>
+</head>
+<body>
+Hi
+
+<SCRIPT>
+
+eval("document.write('"+document.URL.substring(document.URL.indexOf("name=")+5,document.URL.length)+"');");
+
+</SCRIPT>
+
+<BR>
+Welcome to our system
+</body>
+</HTML>

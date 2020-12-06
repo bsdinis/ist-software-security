@@ -1,0 +1,34 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to URL redirecting. 
+
+SOURCE:
+    document.location [ret]
+    
+SINK:
+    element.style.background
+-->
+<HTML>
+
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+
+<body>
+Hi
+
+<SCRIPT>
+function ajax()
+{
+    document.getElementById("test").style.background = document.URL;
+}
+</SCRIPT>
+
+<BR>
+Welcome to our system
+<input id="q" type="button" onclick="ajax()" value="Question?" src="foo.jpg"/>
+<div id="test" style="background: foo.jpg"></div>
+</body>
+</HTML>

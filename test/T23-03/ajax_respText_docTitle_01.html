@@ -1,0 +1,44 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to DOM XSS. 
+
+SOURCE:
+    XHR.responseText [ret]
+    
+SINK:
+    document.title 
+    Note: 2nd sink in catch block is commented out
+-->
+<HTML>
+
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+
+<body>
+Hi
+
+<SCRIPT>
+function ajax()
+{
+    try{
+        var req = new XMLHttpRequest();  
+        req.open("GET", "http://www.example.com", false);   
+        req.send(null);  
+        var doc = req.responseText;
+        
+        document.title = doc;
+    }catch(e){
+        //document.writeln("Error: " + e);
+    }          
+}
+</SCRIPT>
+
+<BR>
+Welcome to our system
+<input type="button" onclick="ajax()" value="Question?" />
+<div id="test"></div>
+</body>
+</HTML>

@@ -1,0 +1,35 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to URL redirecting or XSS. 
+
+SOURCE:
+    document.URL [ret]
+    
+SINK:
+    string.link() [Arg#2]
+-->
+<HTML>
+
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+
+<body>
+Hi
+
+<SCRIPT>
+function ajax()
+{
+    var str = new String("foo");
+    var linkedStr = str.link(document.URL);
+}
+</SCRIPT>
+
+<BR>
+Welcome to our system
+<input id="q" type="button" onclick="ajax()" value="Question?"/>
+<div id="test"></div>
+</body>
+</HTML>

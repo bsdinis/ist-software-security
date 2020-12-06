@@ -1,0 +1,28 @@
+<!-- 0 -->
+<!-- 
+NOTE:
+=======
+Not a redirection problem (innerText on a node is considered safe)
+!-->
+
+<HTML>
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+<body>
+Hi
+
+<SCRIPT>
+
+var t = document.getElementById("t");
+
+var k = "location";
+
+document[k] = t.innerText;
+
+</SCRIPT>
+
+<BR>
+Welcome to our system
+</body>
+</HTML>

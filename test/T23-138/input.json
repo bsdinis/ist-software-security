@@ -1,1 +1,1 @@
-{"type": "Program", "sourceType": "script", "body": []}
+{"type": "Program", "sourceType": "script", "body": [{"type": "ExpressionStatement", "expression": {"type": "UnaryExpression", "prefix": true, "operator": "void", "argument": {"type": "Literal", "value": 0, "raw": "0"}}}]}
