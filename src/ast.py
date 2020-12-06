@@ -30,7 +30,9 @@ class Node:
         children = dict()
         for tag, obj in node_json.items():
             assert tag not in children, 'Duplicate child: {}'.format(tag)
-            if isinstance(obj, dict):
+            if tag in {'alternate', 'label'} and obj is None:
+                pass
+            elif isinstance(obj, dict):
                 children[tag] = cls.from_json(obj)
             elif isinstance(obj, list):
                 children[tag] = [cls.from_json(o) for o in obj]
