@@ -5,7 +5,7 @@ convert json to an AST
 '''
 
 from typing import Any, Optional, Dict, List
-from models import Pattern
+from models import Pattern, Graph
 
 class Node:
     def __init__(self, type: str, name: Optional[str] = None, children: Dict[str, Any] = dict()):
@@ -50,41 +50,30 @@ class Node:
         return f(self,pattern)
 
 
-def taint_propagate(node: Node , pattern: Pattern, spaces: Optional[str] = "", vars: Optional[dict] = {}, funcs: Optional[dict] = {}, vulns: Optional[list] = []):
-   
-    if (node.name == None):
-        print(spaces + node.type)
-    else:
-        print(spaces + node.type + " " + node.name)
+def taint_propagate(node: Node , pattern: Pattern, graph: Optional[Graph] = None, vulns: Optional[list] = []):
+
+    if graph == None:
+        graph = Graph()
 
     if node.type == "AssignmentExpression":
-        left = get_left_argument(node.children["left"])
-        right = get_right_argument(node.children["right"], pattern, vars=vars)
+        (graph, id) = get_right_argument(node.children["right"], pattern, graph)
+        graph = get_left_argument(node.children["left"], graph, id)
 
-        if right[1]:
-            vars[left] = {
-                'tainted': True,
-                'source': right[0]
-            }
-        else:
-            vars[left] = { 'tainted': False }
-        print(left)
-        print(right)
-    elif node.type == "VariableDeclaration":
-        print(get_left_argument(node.children["id"]))
-        print(get_right_argument(node.children["init"], pattern, vars=vars))
+        print(graph.nodes)
+        print(graph.abstractNodes)
+    #elif node.type == "VariableDeclaration":
+        #print(get_left_argument(node.children["id"], graph))
+        #print(get_right_argument(node.children["init"], pattern, graph))
     else:
         for _, child in node.children.items():
-            if isinstance(child, dict):
-                taint_propagate(child, pattern, spaces + " ", vars, funcs, vulns)
+            if isinstance(child, dict) or isinstance(child, Node):
+                taint_propagate(child, pattern, graph, vulns)
             elif isinstance(child, list):
                 for c in child:
-                    taint_propagate(c, pattern, spaces + " ", vars, funcs, vulns)
-            elif isinstance(child, Node):
-                taint_propagate(child, pattern, spaces + " ", vars, funcs, vulns)
-      
-def get_left_argument(node: Node, path: list = []):
-    if node.type == "Identifier":
+                    taint_propagate(c, pattern, graph, vulns)
+
+def get_left_argument(node: Node, graph: Graph, id: str):
+    '''if node.type == "Identifier":
         if len(path) > 0:
             path = [node.name] + path
             return ".".join(path)
@@ -92,24 +81,44 @@ def get_left_argument(node: Node, path: list = []):
             return node.name
     elif node.type == "MemberExpression":
         path = [node.children["property"].name] + path
-        return get_left_argument(node["object"], path)
-
-def get_right_argument(node: Node, pattern: Pattern, path: list = [], vars: dict = {}, tainted: bool = False):
+        return get_left_argument(node["object"])'''
     if node.type == "Identifier":
+        graph.addNode(node.name, id)
+        return graph
+
+
+
+def get_right_argument(node: Node, pattern: Pattern, graph: Graph, parent: str = None):
+    '''if node.type == "Identifier":
         if len(path) > 0:
             path = [node.name] + path
             pathStr = ".".join(path)
-            isTainted = tainted or pathStr in pattern.getSources() or pathStr in vars and vars[pathStr]['tainted']
-            return (pathStr, isTainted)
+            return pathStr
         else:
             return node.name
     elif node.type == "Literal":
-        return (node.children["value"], False)
+        return node.children["value"]
     elif node.type == "MemberExpression":
-        if not tainted and path in pattern.getSources():
-            tainted = True
         path = [node.children["property"].name] + path
-        return get_right_argument(node["object"], pattern, path, vars, tainted)
+        return get_right_argument(node["object"], pattern, graph, path)'''
+
+    if node.type == "Identifier":
+        if parent != None:
+            graph.addAbstractNode(parent + "." + node.name)
+            graph.addMemberNode(node.name)
+            return (graph, parent + "." + node.name)
+        else:   
+            graph.addAbstractNode(node.name)    
+            graph.addNode(node.name)
+            return (graph, node.name)
+    elif node.type == "Literal":
+        graph.addAbstractNode(node.children["raw"])
+        return (graph, node.children["raw"])
+    elif node.type == "MemberExpression":
+        (graph, name) = get_right_argument(node.children["object"], pattern, graph)
+        return get_right_argument(node.children["property"], pattern, graph, name)
+
+
         
         
     
@@ -128,6 +137,6 @@ class AST:
     
     def taint_analysis(self, pattern: Pattern) -> List:
         ''' detect all ilegal flows with a specific Pattern'''
-        self.root.visit(taint_propagate,pattern)
+        self.root.visit(taint_propagate, pattern)
         return []
 
