@@ -6,22 +6,22 @@ import argparse
 import sys
 import json
 
-from ast import AST # type: ignore
-from analyzer import analyze # type: ignore
-from models import Pattern # type: ignore
+from ast import AST  # type: ignore
+from analyzer import analyze  # type: ignore
+from model import Pattern  # type: ignore
+
+import logging
+VERBOSE = True
+logging.basicConfig(format='%(levelname)s:\t%(message)s', level=logging.DEBUG if VERBOSE else logging.INFO)
 
 def main(input_file: str, pattern_file: str):
     with open(input_file, 'r') as f:
         program = json.load(f)
 
     with open(pattern_file, 'r') as f:
-        loaded_patterns = json.load(f)
-
-    patterns = {}
+        patterns = [Pattern(p) for p in json.load(f)]
 
     prog_tree = AST.from_json(program)
-    for pattern in loaded_patterns:
-        patterns[pattern['vulnerability']] = Pattern(pattern)
     vulns = analyze(prog_tree, patterns)
 
     output = input_file.split('.json')[0] + '.output.json'

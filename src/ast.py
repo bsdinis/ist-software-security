@@ -4,19 +4,19 @@ ast.py
 convert json to an AST
 '''
 
-from typing import Any, Optional, Dict, List
-from models import Pattern, Graph
+from typing import Any, Optional, Dict, List, Set
+from model import AccessPath, Pattern
+
+from functools import reduce
+
+import logging
+VERBOSE = False
+logging.basicConfig(format='%(module)s: %(funcName)s\t%(message)s')
+logger = logging.getLogger(__name__)
+logger.setLevel(level=logging.DEBUG if VERBOSE else logging.INFO)
+
 
 class Node:
-    def __init__(self, type: str, name: Optional[str] = None, children: Dict[str, Any] = dict()):
-        self.type = type
-        self.name = name
-        self.children = children
-
-    def __getitem__(self, key: str):
-        ''' emulate dictionary '''
-        return self.children[key]
-
     @classmethod
     def from_json(cls, node_json: Dict[str, Any]):
         ''' convert json to node '''
@@ -41,92 +41,118 @@ class Node:
             elif isinstance(obj, bool):
                 children[tag] = obj
             else:
-                raise RuntimeError('Cannot parse child `{}` with type {}'.format(tag, obj))
+                raise RuntimeError(
+                    'Cannot parse child `{}` with type {}'.format(
+                        tag, obj))
 
         return cls(type, name=name, children=children)
 
+    def __init__(self,
+                 type: str,
+                 name: Optional[str] = None,
+                 children: Dict[str,
+                                Any] = dict()):
+        self.type = type
+        self.name = name
+        self.children = children
 
-    def visit(self, f, pattern) -> Any:
-        return f(self,pattern)
+    def __getitem__(self, key: str):
+        ''' emulate dictionary '''
+        return self.children[key]
 
+    def __repr__(self) -> str:
+        if self.type == 'AssignmentExpression':
+            return '<{}: `{} = {}`>'.format(
+                self.type, self['left'], self['right'])
+        elif self.type == 'CallExpression':
+            return '<{}: `{}({})`>'.format(
+                self.type, self['callee'], ', '.join(
+                    repr(a) for a in self['arguments']))
+        elif self.type == 'MemberExpression':
+            return '<{}: `{}`>'.format(
+                self.type, str(list(self.get_rvalue_aps())[0]))
 
-def taint_propagate(node: Node , pattern: Pattern, graph: Optional[Graph] = None, vulns: Optional[list] = []):
+        return '<{}: `{}`>'.format(
+            self.type,
+            self.name) if self.name else '<{}>'.format(
+            self.type)
 
-    if graph == None:
-        graph = Graph()
+    def ap(self) -> AccessPath:
+        assert self.name is not None, 'Node {} has no name, thus it has no AccessPath'.format(
+            self)
+        return AccessPath.from_str(self.name)
 
-    if node.type == "AssignmentExpression":
-        (graph, id) = get_right_argument(node.children["right"], pattern, graph)
-        graph = get_left_argument(node.children["left"], graph, id)
+    def get_aps(self) -> Set[AccessPath]:
+        return self.get_rvalue_aps() | self.get_lvalue_aps()
 
-        print(graph.nodes)
-        print(graph.abstractNodes)
-    #elif node.type == "VariableDeclaration":
-        #print(get_left_argument(node.children["id"], graph))
-        #print(get_right_argument(node.children["init"], pattern, graph))
-    else:
-        for _, child in node.children.items():
-            if isinstance(child, dict) or isinstance(child, Node):
-                taint_propagate(child, pattern, graph, vulns)
-            elif isinstance(child, list):
-                for c in child:
-                    taint_propagate(c, pattern, graph, vulns)
+    def get_lvalue_aps(self) -> Set[AccessPath]:
+        if self.type in {'Identifier'}:
+            return {self.ap()}
+        elif self.type in {'AssignmentExpression'}:
+            return self['left'].get_rvalue_aps()
+        elif self.type in {'CallExpression'}:
+            return self['callee'].get_rvalue_aps() | self.get_rvalue_aps()
 
-def get_left_argument(node: Node, graph: Graph, id: str):
-    '''if node.type == "Identifier":
-        if len(path) > 0:
-            path = [node.name] + path
-            return ".".join(path)
-        else:
-            return node.name
-    elif node.type == "MemberExpression":
-        path = [node.children["property"].name] + path
-        return get_left_argument(node["object"])'''
-    if node.type == "Identifier":
-        graph.addNode(node.name, id)
-        return graph
+        return set()
 
+    def get_rvalue_aps(self) -> Set[AccessPath]:
+        if self.type in {'Identifier'}:
+            return {self.ap()}
+        elif self.type in {'CallExpression'}:
+            return reduce(lambda x, y: x | y, (expr.get_aps()
+                                               for expr in self['arguments']), set())
+        elif self.type in {'MemberExpression'}:
+            left = self['object'].get_rvalue_aps()
+            right = self['property'].get_rvalue_aps()
+            return set(l + r for l in left for r in right)
+        elif self.type in {'UpdateExpression', 'UnaryExpression', 'SpreadElement'}:
+            return self['argument'].get_rvalue_aps()
+        elif self.type in {'BinaryExpression', 'LogicalExpression'}:
+            return self['left'].get_rvalue_aps(
+            ) | self['right'].get_rvalue_aps()
+        elif self.type in {'ConditionalExpression'}:
+            # TODO: implicit flows
+            return self['consequent'].get_rvalue_aps(
+            ) | self['alternate'].get_rvalue_aps()
+        elif self.type in {'SequenceExpression'}:
+            if len(self['expressions']) == 0:
+                return set()
+            else:
+                return self['expressions'][0].get_rvalue_aps()
 
+        return set()
 
-def get_right_argument(node: Node, pattern: Pattern, graph: Graph, parent: str = None):
-    '''if node.type == "Identifier":
-        if len(path) > 0:
-            path = [node.name] + path
-            pathStr = ".".join(path)
-            return pathStr
-        else:
-            return node.name
-    elif node.type == "Literal":
-        return node.children["value"]
-    elif node.type == "MemberExpression":
-        path = [node.children["property"].name] + path
-        return get_right_argument(node["object"], pattern, graph, path)'''
+    def get_tainted_sources(self,
+                            tainted_aps: Dict[AccessPath,
+                                              Set[AccessPath]],
+                            pattern: Pattern) -> Set[AccessPath]:
+        def ap_to_src_ap(ap: AccessPath,
+                         tainted_aps: Dict[AccessPath,
+                                           Set[AccessPath]],
+                         pattern: Pattern) -> Set[AccessPath]:
+            if ap in tainted_aps:
+                return tainted_aps[ap]
+            elif ap.is_potential_source(pattern):
+                return {ap}
+            return None
 
-    if node.type == "Identifier":
-        if parent != None:
-            graph.addAbstractNode(parent + "." + node.name)
-            graph.addMemberNode(node.name)
-            return (graph, parent + "." + node.name)
-        else:   
-            graph.addAbstractNode(node.name)    
-            graph.addNode(node.name)
-            return (graph, node.name)
-    elif node.type == "Literal":
-        graph.addAbstractNode(node.children["raw"])
-        return (graph, node.children["raw"])
-    elif node.type == "MemberExpression":
-        (graph, name) = get_right_argument(node.children["object"], pattern, graph)
-        return get_right_argument(node.children["property"], pattern, graph, name)
+        logger.debug('involved aps [{}]: {}'.format(self, '\t'.join('({}, {})'.format(ap, ap.is_source(pattern)) for ap in self.get_rvalue_aps())))
+        return reduce(
+            lambda a, b: a | b, filter(
+                lambda x: x is not None, map(
+                    lambda y: ap_to_src_ap(
+                        y, tainted_aps, pattern), self.get_rvalue_aps())), set())
 
+    def is_sink(self, pattern: Pattern) -> bool:
+        return any(ap.is_sink(pattern) for ap in self.get_lvalue_aps())
 
-        
-        
-    
 
 class AST:
     def __init__(self, root: Node):
-        assert root.type == 'Program', 'Root must by `Program`, not {}'.format(root.type)
+        assert root.type == 'Program', 'Root must by `Program`, not {}'.format(
+            root.type)
         self.root = root
+        self.fdecls: Dict[str, Optional[Node]] = dict()
 
     @classmethod
     def from_json(cls, json_file: Dict[str, Any]):
@@ -134,9 +160,27 @@ class AST:
         root = Node.from_json(json_file)
         return cls(root)
 
-    
-    def taint_analysis(self, pattern: Pattern) -> List:
-        ''' detect all ilegal flows with a specific Pattern'''
-        self.root.visit(taint_propagate, pattern)
-        return []
+    def find_fdecl(self, fname: str) -> Optional[Node]:
+        if fname in self.fdecls:
+            return self.fdecls[fname]
 
+        def find(node: Node, name: str) -> Optional[Node]:
+            if node.type in [
+                'FunctionDeclaration',
+                'FunctionExpression',
+                    'ArrowFunctionExpression'] and node.name == name:
+                return node
+
+            for n in node.children.values():
+                if not isinstance(n, Node):
+                    continue
+
+                a = find(n, name)
+                if a is not None:
+                    return a
+
+            return None
+
+        fdecl = find(self.root, fname)
+        self.fdecls[fname] = fdecl
+        return fdecl

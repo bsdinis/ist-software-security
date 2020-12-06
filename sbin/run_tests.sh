@@ -10,10 +10,9 @@ CLEAR='\033[0m' # No Color
 for test_dir in $(ls -d test/T23-*)
 do
     total_tests=$(echo "${total_tests} + 1" | bc)
-    echo -n "Running $(basename ${test_dir})... "
-    python3 src/main.py ${test_dir}/input.json ${test_dir}/patterns.json
-    diff -i -E -Z -b -w -B ${test_dir}/output.json ${test_dir}/input.output.json >/dev/null 2>/dev/null
-    if [[ "$?" -eq "0" ]]
+    echo -n "Running $(basename "${test_dir}")... "
+    python3 src/main.py "${test_dir}/input.json" "${test_dir}/patterns.json"
+    if python3 src/cmp_output.py "${test_dir}/output.json" "${test_dir}/input.output.json" >/dev/null 2>/dev/null
     then
         passed_tests=$(echo "${passed_tests} + 1" | bc)
         echo -e "${GREEN}OK${CLEAR}"
