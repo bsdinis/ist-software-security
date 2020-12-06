@@ -12,7 +12,9 @@ from model import Pattern  # type: ignore
 
 import logging
 VERBOSE = True
-logging.basicConfig(format='%(levelname)s:\t%(message)s', level=logging.DEBUG if VERBOSE else logging.INFO)
+logging.basicConfig(format='%(levelname)s:\t%(message)s',
+                    level=logging.DEBUG if VERBOSE else logging.INFO)
+
 
 def main(input_file: str, pattern_file: str):
     with open(input_file, 'r') as f:

@@ -13,6 +13,7 @@ logging.basicConfig(format='%(module)s: %(funcName)s\t%(message)s')
 logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.DEBUG if VERBOSE else logging.INFO)
 
+
 class CallGraph:
     class CGNode:
         def __init__(self, n: Optional[Node]):

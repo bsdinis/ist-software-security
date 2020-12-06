@@ -17,17 +17,23 @@ logging.basicConfig(format='%(module)s: %(funcName)s\t%(message)s')
 logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.DEBUG if VERBOSE else logging.INFO)
 
+
 def gen_vuln(
         pattern: Pattern,
         source_aps: Set[AccessPath],
         sink_aps: Set[AccessPath]) -> Vulnerability:
-    return Vulnerability(pattern.vuln, [str(ap) for ap in source_aps], [str(ap) for ap in sink_aps])
+    return Vulnerability(
+        pattern.vuln, [
+            str(ap) for ap in source_aps], [
+            str(ap) for ap in sink_aps])
 
 
 def basic_taint_analysis(
         program: AST,
         pattern: Pattern) -> List[Vulnerability]:
-    def analyze_node(cg_node: CallGraph.CGNode, pattern: Pattern) -> Set[Vulnerability]:
+    def analyze_node(
+            cg_node: CallGraph.CGNode,
+            pattern: Pattern) -> Set[Vulnerability]:
         tainted_aps: Dict[AccessPath, Set[AccessPath]] = dict()
         if cg_node.node is None:
             return set()
@@ -44,10 +50,14 @@ def basic_taint_analysis(
 
             if stmt.type == 'AssignmentExpression':
                 lvalue_aps = stmt['left'].get_lvalue_aps()
-                rvalue_aps = stmt['right'].get_tainted_sources(tainted_aps, pattern)
+                rvalue_aps = stmt['right'].get_tainted_sources(
+                    tainted_aps, pattern)
 
                 logger.debug(stmt)
-                logger.debug('\tlvalue aps = {} (sink? {})'.format(lvalue_aps, any(a.is_sink(pattern) for a in lvalue_aps)))
+                logger.debug(
+                    '\tlvalue aps = {} (sink? {})'.format(
+                        lvalue_aps, any(
+                            a.is_sink(pattern) for a in lvalue_aps)))
                 logger.debug('\trvalue aps = {}'.format(str(rvalue_aps)))
 
                 if len(rvalue_aps) > 0:
@@ -81,9 +91,11 @@ def basic_taint_analysis(
                             set())))
 
                 logger.debug(stmt)
-                logger.debug('\tcallee aps = {} (sink? {})'.format(callee_aps, any(a.is_sink(pattern) for a in callee_aps)))
+                logger.debug(
+                    '\tcallee aps = {} (sink? {})'.format(
+                        callee_aps, any(
+                            a.is_sink(pattern) for a in callee_aps)))
                 logger.debug('\tsource aps = {}'.format(str(source_aps)))
-
 
                 sink_aps = set(filter(
                     lambda x: x.is_sink(pattern),

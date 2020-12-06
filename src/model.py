@@ -12,6 +12,7 @@ logging.basicConfig(format='%(module)s: %(funcName)s\t%(message)s')
 logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.DEBUG if VERBOSE else logging.INFO)
 
+
 class Pattern:
     def __init__(self, pattern: Dict[str, Any]):
         self.vuln = pattern['vulnerability']
@@ -20,7 +21,8 @@ class Pattern:
         self.sanitizers = pattern['sanitizers']
 
     def __repr__(self) -> str:
-        return '<Pattern: {} ===> {} [ {} ]>'.format(self.sources, self.sinks, self.sanitizers)
+        return '<Pattern: {} ===> {} [ {} ]>'.format(
+            self.sources, self.sinks, self.sanitizers)
 
 
 class Vulnerability:

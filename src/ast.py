@@ -71,7 +71,8 @@ class Node:
                 self.type, self['callee'], ', '.join(
                     repr(a) for a in self['arguments']))
         elif self.type == 'MemberExpression':
-            return '<{}: `{}`>'.format(self.type, str(list(self.get_rvalue_aps())[0]))
+            return '<{}: `{}`>'.format(
+                self.type, str(list(self.get_rvalue_aps())[0]))
 
         return '<{}: `{}`>'.format(
             self.type,
@@ -141,7 +142,13 @@ class Node:
                 return {ap}
             return None
 
-        logger.debug('involved aps [{}]: {}'.format(self, '\t'.join('({}, {})'.format(ap, ap.is_source(pattern)) for ap in self.get_rvalue_aps())))
+        logger.debug(
+            'involved aps [{}]: {}'.format(
+                self,
+                '\t'.join(
+                    '({}, {})'.format(
+                        ap,
+                        ap.is_source(pattern)) for ap in self.get_rvalue_aps())))
         return reduce(
             lambda a, b: a | b, filter(
                 lambda x: x is not None, map(
