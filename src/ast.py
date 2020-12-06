@@ -10,7 +10,7 @@ from model import AccessPath, Pattern
 from functools import reduce
 
 import logging
-VERBOSE = False
+VERBOSE = True
 logging.basicConfig(format='%(module)s: %(funcName)s\t%(message)s')
 logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.DEBUG if VERBOSE else logging.INFO)
@@ -93,7 +93,7 @@ class Node:
         elif self.type in {'AssignmentExpression'}:
             return self['left'].get_rvalue_aps()
         elif self.type in {'CallExpression'}:
-            return self['callee'].get_rvalue_aps() | self.get_rvalue_aps()
+            return self.get_rvalue_aps()
 
         return set()
 
@@ -102,7 +102,7 @@ class Node:
             return {self.ap()}
         elif self.type in {'CallExpression'}:
             return reduce(lambda x, y: x | y, (expr.get_aps()
-                                               for expr in self['arguments']), set())
+                                               for expr in self['arguments']), self['callee'].get_rvalue_aps())
         elif self.type in {'MemberExpression'}:
             left = self['object'].get_rvalue_aps()
             right = self['property'].get_rvalue_aps()
@@ -136,11 +136,14 @@ class Node:
                          tainted_aps: Dict[AccessPath,
                                            Set[AccessPath]],
                          pattern: Pattern) -> Set[AccessPath]:
+            logger.debug('ap: {}'.format(ap))
+            src_ap = set()
             if ap in tainted_aps:
-                return tainted_aps[ap]
+                src_ap |= tainted_aps[ap]
             elif ap.is_potential_source(pattern):
-                return {ap}
-            return None
+                src_ap |= {ap}
+            logger.debug('ap: {} -> None'.format(ap))
+            return src_ap
 
         logger.debug(
             'involved aps [{}]: {}'.format(
@@ -150,10 +153,8 @@ class Node:
                         ap,
                         ap.is_source(pattern)) for ap in self.get_rvalue_aps())))
         return reduce(
-            lambda a, b: a | b, filter(
-                lambda x: x is not None, map(
-                    lambda y: ap_to_src_ap(
-                        y, tainted_aps, pattern), self.get_rvalue_aps())), set())
+            lambda a, b: a | b, map(
+                    lambda y: ap_to_src_ap(y, tainted_aps, pattern), self.get_rvalue_aps()), set())
 
     def is_sink(self, pattern: Pattern) -> bool:
         return any(ap.is_sink(pattern) for ap in self.get_lvalue_aps())

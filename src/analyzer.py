@@ -123,4 +123,5 @@ def analyze(program: AST, patterns: List[Pattern]) -> List[Vulnerability]:
     for p in patterns:
         vulns += basic_taint_analysis(program, p)
 
+    logger.debug('\n'.join(repr(v) for v in vulns))
     return vulns

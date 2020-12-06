@@ -7,7 +7,7 @@ from typing import Any, Dict, List
 import json
 
 import logging
-VERBOSE = True
+VERBOSE = False
 logging.basicConfig(format='%(module)s: %(funcName)s\t%(message)s')
 logger = logging.getLogger(__name__)
 logger.setLevel(level=logging.DEBUG if VERBOSE else logging.INFO)
@@ -105,9 +105,15 @@ class AccessPath:
         return any(self == AccessPath.from_str(s) for s in pattern.sinks)
 
     def is_potential_source(self, pattern: Pattern) -> bool:
+        for s in pattern.sources:
+            ap_s = AccessPath.from_str(s)
+            logger.debug('{} <= {} ? {}'.format(ap_s, self, self <= ap_s))
         return any(self <= AccessPath.from_str(s) for s in pattern.sources)
 
     def is_source(self, pattern: Pattern) -> bool:
+        for s in pattern.sources:
+            ap_s = AccessPath.from_str(s)
+            logger.debug('{} == {} ? {}'.format(ap_s, self, self == ap_s))
         return any(self == AccessPath.from_str(s) for s in pattern.sources)
 
     def __add__(self, other):
