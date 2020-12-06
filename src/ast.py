@@ -101,8 +101,11 @@ class Node:
         if self.type in {'Identifier'}:
             return {self.ap()}
         elif self.type in {'CallExpression'}:
-            return reduce(lambda x, y: x | y, (expr.get_aps()
-                                               for expr in self['arguments']), self['callee'].get_rvalue_aps())
+            return reduce(
+                lambda x,
+                y: x | y,
+                (expr.get_aps() for expr in self['arguments']),
+                self['callee'].get_rvalue_aps())
         elif self.type in {'MemberExpression'}:
             left = self['object'].get_rvalue_aps()
             right = self['property'].get_rvalue_aps()
@@ -128,7 +131,95 @@ class Node:
 
         return set()
 
-    #TODO: Check for sinks and sanitizers on right side
+    def get_san_rvalue_aps(self, pattern: Pattern) -> Set[AccessPath]:
+        if self.type in {'Identifier'}:
+            if self.name in pattern.sources:
+                return set()
+
+            return {self.ap()}
+        elif self.type in {'CallExpression'}:
+            if self['callee'].name in pattern.sanitizers:
+                return reduce(
+                    lambda x,
+                    y: x | y,
+                    (expr.get_aps() for expr in self['arguments']),
+                    self['callee'].get_rvalue_aps())
+            else:
+                return set()
+
+        elif self.type in {'MemberExpression'}:
+            left = self['object'].get_rvalue_aps()
+            right = self['property'].get_rvalue_aps()
+
+            idents = set()
+            for l in left:
+                idents.add(l)
+                for r in right:
+                    idents.add(l + r)
+
+            return set(filter(lambda x: str(x) in pattern.sources, idents))
+
+        elif self.type in {'UpdateExpression', 'UnaryExpression', 'SpreadElement'}:
+            return self['argument'].get_rvalue_aps()
+        elif self.type in {'BinaryExpression', 'LogicalExpression'}:
+            return self['left'].get_rvalue_aps(
+            ) | self['right'].get_rvalue_aps()
+        elif self.type in {'ConditionalExpression'}:
+            # TODO: implicit flows
+            return self['consequent'].get_rvalue_aps(
+            ) | self['alternate'].get_rvalue_aps()
+        elif self.type in {'SequenceExpression'}:
+            if len(self['expressions']) == 0:
+                return set()
+            else:
+                return self['expressions'][0].get_rvalue_aps()
+
+        return set()
+
+    def get_rvalue_sanitizers(self, pattern: Pattern) -> Set[AccessPath]:
+        if self.type in {'Identifier'}:
+            if self.name in pattern.sanitizers:
+                return {self.ap()}
+            return set()
+        elif self.type in {'CallExpression'}:
+            if self['callee'].name in pattern.sanitizers:
+                return self['callee'].ap()
+            else:
+                return set()
+
+        elif self.type in {'MemberExpression'}:
+            left = self['object'].get_rvalue_aps()
+            right = self['property'].get_rvalue_aps()
+
+            idents = set()
+            for l in left:
+                idents.add(l)
+                for r in right:
+                    idents.add(l + r)
+
+            return set(filter(lambda x: str(x) in pattern.sanitizers, idents))
+
+        elif self.type in {'UpdateExpression', 'UnaryExpression', 'SpreadElement'}:
+            return self['argument'].get_rvalue_sanitizers(pattern)
+        elif self.type in {'BinaryExpression', 'LogicalExpression'}:
+            return self['left'].get_rvalue_sanitizers(
+                pattern) | self['right'].get_rvalue_sanitizers(pattern)
+        elif self.type in {'ConditionalExpression'}:
+            # TODO: implicit flows
+            return self['consequent'].get_rvalue_sanitizers(
+                pattern) | self['alternate'].get_rvalue_sanitizers(pattern)
+        elif self.type in {'SequenceExpression'}:
+            if len(self['expressions']) == 0:
+                return set()
+            else:
+                return self['expressions'][0].get_rvalue_sanitizers(pattern)
+
+        return set()
+
+    def get_usan_rvalue_aps(self, pattern: Pattern) -> Set[AccessPath]:
+        return self.get_rvalue_aps() - self.get_san_rvalue_aps(pattern)
+
+    # TODO: Check for sinks and sanitizers on right side
     def get_tainted_sources(self,
                             tainted_aps: Dict[AccessPath,
                                               Set[AccessPath]],
@@ -152,10 +243,13 @@ class Node:
                 '\t'.join(
                     '({}, {}, {}, {})'.format(
                         ap,
-                        ap.is_source(pattern), ap.is_sanitizer(pattern), ap.is_sink(pattern)) for ap in self.get_rvalue_aps())))
+                        ap.is_source(pattern),
+                        ap.is_sanitizer(pattern),
+                        ap.is_sink(pattern)) for ap in self.get_rvalue_aps())))
         return reduce(
             lambda a, b: a | b, map(
-                    lambda y: ap_to_src_ap(y, tainted_aps, pattern), self.get_rvalue_aps()), set())
+                lambda y: ap_to_src_ap(
+                    y, tainted_aps, pattern), self.get_rvalue_aps()), set())
 
     def is_sink(self, pattern: Pattern) -> bool:
         return any(ap.is_sink(pattern) for ap in self.get_lvalue_aps())

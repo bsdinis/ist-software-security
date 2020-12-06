@@ -98,19 +98,19 @@ class AccessPath:
     def is_potential_source(self, pattern: Pattern) -> bool:
         for s in pattern.sources:
             ap_s = AccessPath.from_str(s)
-            logger.debug('{} <= {} ? {}'.format(ap_s, self, self <= ap_s))
+            #logger.debug('{} <= {} ? {}'.format(ap_s, self, self <= ap_s))
         return any(self <= AccessPath.from_str(s) for s in pattern.sources)
 
     def is_source(self, pattern: Pattern) -> bool:
         for s in pattern.sources:
             ap_s = AccessPath.from_str(s)
-            logger.debug('{} == {} ? {}'.format(ap_s, self, self == ap_s))
+            #logger.debug('{} == {} ? {}'.format(ap_s, self, self == ap_s))
         return any(self == AccessPath.from_str(s) for s in pattern.sources)
 
     def is_sanitizer(self, pattern: Pattern) -> bool:
         for s in pattern.sanitizers:
             ap_s = AccessPath.from_str(s)
-            logger.debug('{} == {} ? {}'.format(ap_s, self, self == ap_s))
+            #logger.debug('{} == {} ? {}'.format(ap_s, self, self == ap_s))
         return any(self == AccessPath.from_str(s) for s in pattern.sanitizers)
 
     def is_sink(self, pattern: Pattern) -> bool:
@@ -128,3 +128,12 @@ class AccessPath:
 
     def __repr__(self) -> str:
         return '.'.join((self.var, ) + self.field_idents)
+
+    def prefixes(self) -> List[Any]:
+        return [AccessPath(self.var, list(self.field_idents[:i]))
+                for i in range(len(self.field_idents))]
+
+    def rem_prefix(self, pref) -> Any:
+        assert pref in self.prefixes()
+        fields = list(self.field_idents[len(pref.field_idents):])
+        return AccessPath(fields[0], fields[1:])
