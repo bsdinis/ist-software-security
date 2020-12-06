@@ -53,8 +53,8 @@ def taint_analysis(
                 stmt: Node,
                 pattern: Pattern,
                 taint_map: TaintMap) -> Iterable[Vulnerability]:
+            if stmt == None: return []
 
-            # a = sink(src)
             if stmt.type == 'AssignmentExpression':
                 for a in analyze_expr(
                         stmt['right'],
@@ -168,6 +168,66 @@ def taint_analysis(
                             for s in taint_map.taints[src]:
                                 yield gen_sanitized_vuln(pattern, {s}, {san}, sink_aps)
 
+            elif stmt.type in {'ConditionalExpression'}:
+                for a in analyze_expr(stmt['test'], pattern, taint_map):
+                    yield a
+                for a in analyze_expr(stmt['consequent'], pattern, taint_map):
+                    yield a
+                if 'alternate' in stmt.children:
+                    for v in analyze_expr(stmt['alternate'], pattern, taint_map):
+                        yield v
+
+                #TODO implicit flows
+
+            elif stmt.type in {'UpdateExpression', 'UnaryExpression', 'SpreadElement'}:
+                for a in analyze_expr(stmt['argument'], pattern, taint_map):
+                    yield a
+            elif stmt.type in {'BinaryExpression', 'LogicalExpression'}:
+                for a in analyze_expr(stmt['left'], pattern, taint_map):
+                    yield a
+                for a in analyze_expr(stmt['right'], pattern, taint_map):
+                    yield a
+            elif stmt.type in {'SequenceExpression'}:
+                for expr in stmt['expressions']:
+                    for a in analyze_expr(expr, pattern, taint_map):
+                        yield a
+
+        def analyze_stmt(
+                stmt: Node,
+                pattern: Pattern,
+                taint_map: TaintMap) -> Iterable[Vulnerability]:
+            if stmt == None: return []
+            if stmt.type == 'BlockStatement':
+                for s in stmt['body']:
+                    if s.type not in ['ExpressionStatement', 'IfStatement', 'WhileStatement', 'BlockStatement']:
+                        continue
+
+                    if s.type == 'ExpressionStatement':
+                        s = s['expression']
+                        logger.debug('analyzing expression: {}'.format(s))
+                        for v in analyze_expr(s, pattern, taint_map):
+                            yield v
+                    else:
+                        logger.debug('analyzing expression: {}'.format(s))
+                        for v in analyze_stmt(s, pattern, taint_map):
+                            yield v
+            elif stmt.type == 'IfStatement':
+                for v in analyze_expr(stmt['test'], pattern, taint_map):
+                    yield v
+                for v in analyze_stmt(stmt['consequent'], pattern, taint_map):
+                    yield v
+                if 'alternate' in stmt.children:
+                    for v in analyze_stmt(stmt['alternate'], pattern, taint_map):
+                        yield v
+                # missing implicit flow
+            elif stmt.type == 'WhileStatement':
+                for v in analyze_expr(stmt['test'], pattern, taint_map):
+                    yield v
+                for v in analyze_stmt(stmt['body'], pattern, taint_map):
+                    yield v
+                # missing implicit flow
+
+
         if cg_node.node is None:
             return set()
 
@@ -178,13 +238,18 @@ def taint_analysis(
         vulns: Set[Vulnerability] = set()
         stmts = cg_node.node['body']
         for stmt in stmts:
-            if stmt.type != 'ExpressionStatement':
+            if stmt.type not in ['ExpressionStatement', 'IfStatement', 'WhileStatement', 'BlockStatement']:
                 continue
 
-            stmt = stmt['expression']
-            logger.debug('analyzing statement: {}'.format(stmt))
-            for v in analyze_expr(stmt, pattern, taint_map):
-                vulns.add(v)
+            if stmt.type == 'ExpressionStatement':
+                stmt = stmt['expression']
+                logger.debug('analyzing expression: {}'.format(stmt))
+                for v in analyze_expr(stmt, pattern, taint_map):
+                    vulns.add(v)
+            else:
+                logger.debug('analyzing expression: {}'.format(stmt))
+                for v in analyze_stmt(stmt, pattern, taint_map):
+                    vulns.add(v)
 
         return vulns
 
