@@ -69,8 +69,7 @@ class Node:
                 self.type, self['callee'], ', '.join(
                     repr(a) for a in self['arguments']))
         elif self.type == 'MemberExpression':
-            return '<{}: `{}`>'.format(
-                self.type, str(list(self.get_rvalue_aps())[0]))
+            return '<{}: `{}`>'.format(self.type, str(list(self.get_rvalue_aps())[0]))
 
         return '<{}: `{}`>'.format(
             self.type,
@@ -104,7 +103,11 @@ class Node:
         elif self.type in {'MemberExpression'}:
             left = self['object'].get_rvalue_aps()
             right = self['property'].get_rvalue_aps()
-            return set(l + r for l in left for r in right)
+            if len(right) > 0:
+                return set(l + r for l in left for r in right)
+            else:
+                return left
+
         elif self.type in {'UpdateExpression', 'UnaryExpression', 'SpreadElement'}:
             return self['argument'].get_rvalue_aps()
         elif self.type in {'BinaryExpression', 'LogicalExpression'}:
