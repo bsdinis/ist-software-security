@@ -4,7 +4,7 @@ c=a;
 d=c;
 e(d);
 c=f;
-c="";
+c=e;
 e(c);
 
 // tip: assignments propagate taintedness, and the order in which they are performed matters
