@@ -18,7 +18,8 @@ logger.setLevel(level=logging.DEBUG if VERBOSE else logging.INFO)
 class TaintMap:
     def __init__(self, sources: List[str], sanitizers: List[str]):
         self.taints: Dict[AccessPath, List[AccessPath]] = dict()
-        self.sanitized: Dict[AccessPath, List[Tuple[AccessPath, AccessPath]]] = dict()
+        self.sanitized: Dict[AccessPath,
+                             List[Tuple[AccessPath, AccessPath]]] = dict()
         self.alias: Dict[AccessPath, List[AccessPath]] = dict()
 
         self.sources = [AccessPath.from_str(s) for s in sources]
@@ -35,6 +36,7 @@ class TaintMap:
                 self.alias[s] = []
             else:
                 self.sanitized[s] += [s]
+
     @property
     def keys(self):
         assert self.taints.keys() == self.sanitized.keys() == self.alias.keys()
@@ -46,8 +48,15 @@ class TaintMap:
     def is_sanitized(self, ap: AccessPath) -> bool:
         return ap in self.keys and len(self.taints) == 0
 
-    def potentials(self, ap: AccessPath, l: List[AccessPath]) -> List[AccessPath]:
-        return list(filter(lambda x: x in self.keys and any(ap <= a for a in self.alias[x]), l))
+    def potentials(
+            self,
+            ap: AccessPath,
+            l: List[AccessPath]) -> List[AccessPath]:
+        return list(
+            filter(
+                lambda x: x in self.keys and any(
+                    ap <= a for a in self.alias[x]),
+                l))
 
     def create_alias(self, lval: AccessPath, rval: AccessPath) -> bool:
         rpotentials = self.potentials(rval, self.sources + self.sanitizers)
@@ -66,21 +75,28 @@ class TaintMap:
             return False
 
         for p in lpotentials:
-            if p in self.sources: self.sources.remove(p)
-            if p in self.sanitizers: self.sanitizers.remove(p)
+            if p in self.sources:
+                self.sources.remove(p)
+            if p in self.sanitizers:
+                self.sanitizers.remove(p)
 
         return True
 
     def get_taints(self, rvals: List[AccessPath]) -> List[AccessPath]:
-        prop_taints: Set[AccessPath] = reduce(lambda a,b: a|b, map(lambda x: set(self.taints[x]) if x in self.keys else set(), rvals), set())
-        orig_taints: Set[AccessPath] = reduce(lambda a,b: a|b, map(lambda x: set(self.potentials(x, rvals)), self.sources), set())
+        prop_taints: Set[AccessPath] = reduce(lambda a, b: a | b, map(
+            lambda x: set(self.taints[x]) if x in self.keys else set(), rvals), set())
+        orig_taints: Set[AccessPath] = reduce(
+            lambda a, b: a | b, map(
+                lambda x: set(
+                    self.potentials(
+                        x, rvals)), self.sources), set())
         return list(prop_taints | orig_taints)
 
     def register_assignment(
             self,
             lval: AccessPath,
-            usan_rval: List[AccessPath], #
-            san_rval: List[Tuple[AccessPath, AccessPath]], #
+            usan_rval: List[AccessPath],
+            san_rval: List[Tuple[AccessPath, AccessPath]],
             destructive: bool = True):
 
         rval = usan_rval + [x[0] for x in san_rval]
@@ -88,8 +104,10 @@ class TaintMap:
 
         if destructive:
             if len(rval) == 0:
-                if lval in self.sources: self.sources.remove(lval)
-                if lval in self.sanitizers: self.sanitizers.remove(lval)
+                if lval in self.sources:
+                    self.sources.remove(lval)
+                if lval in self.sanitizers:
+                    self.sanitizers.remove(lval)
                 if lval in self.keys:
                     self.alias[lval] = []
                     self.taints[lval] = []
@@ -101,7 +119,8 @@ class TaintMap:
 
         tainted = self.get_taints(usan_rval)
         possibly_tainted = self.get_taints(rval)
-        if len(tainted) == 0 and (self.is_tainted(lval) or len(possibly_tainted) > 0):
+        if len(tainted) == 0 and (
+                self.is_tainted(lval) or len(possibly_tainted) > 0):
             if lval not in self.keys:
                 self.taints[lval] = list()
                 self.sanitized[lval] = list()
@@ -115,7 +134,6 @@ class TaintMap:
                 elif src in self.sources:
                     self.sanitized[lval].append((src, san))
 
-
         elif len(tainted) > 0:
             if lval not in self.keys:
                 self.taints[lval] = list()
@@ -128,5 +146,7 @@ class TaintMap:
         if destructive:
             potentials = self.potentials(lval, self.sources + self.sanitizers)
             for p in potentials:
-                if p in self.sources: self.sources.remove(p)
-                if p in self.sanitizers: self.sanitizers.remove(p)
+                if p in self.sources:
+                    self.sources.remove(p)
+                if p in self.sanitizers:
+                    self.sanitizers.remove(p)

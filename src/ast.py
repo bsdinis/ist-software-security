@@ -85,6 +85,8 @@ class Node:
         return AccessPath.from_str(self.name)
 
     def get_aps(self) -> Set[AccessPath]:
+        logger.info('{} ---------------> {}'.format(self,
+                                                    self.get_rvalue_aps() | self.get_lvalue_aps()))
         return self.get_rvalue_aps() | self.get_lvalue_aps()
 
     def get_lvalue_aps(self) -> Set[AccessPath]:
@@ -131,7 +133,9 @@ class Node:
 
         return set()
 
-    def get_san_rvalue_aps(self, pattern: Pattern) -> Set[Tuple[AccessPath, AccessPath]]:
+    def get_san_rvalue_aps(
+            self, pattern: Pattern) -> Set[Tuple[AccessPath, AccessPath]]:
+        logger.info('san rvale : {}'.format(self))
         if self.type in {'Identifier'}:
             return set()
         elif self.type in {'CallExpression'}:
@@ -150,11 +154,12 @@ class Node:
         elif self.type in {'UpdateExpression', 'UnaryExpression', 'SpreadElement'}:
             return self['argument'].get_san_rvalue_aps(pattern)
         elif self.type in {'BinaryExpression', 'LogicalExpression'}:
-            return self['left'].get_san_rvalue_aps(pattern
-            ) | self['right'].get_san_rvalue_aps(pattern)
+            return self['left'].get_san_rvalue_aps(
+                pattern) | self['right'].get_san_rvalue_aps(pattern)
         elif self.type in {'ConditionalExpression'}:
             # TODO: implicit flows
-            return self['consequent'].get_san_rvalue_aps(pattern) | self['alternate'].get_san_rvalue_aps(pattern)
+            return self['consequent'].get_san_rvalue_aps(
+                pattern) | self['alternate'].get_san_rvalue_aps(pattern)
         elif self.type in {'SequenceExpression'}:
             if len(self['expressions']) == 0:
                 return set()
