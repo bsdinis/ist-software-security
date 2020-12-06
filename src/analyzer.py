@@ -33,11 +33,11 @@ def gen_vuln(
 
 def gen_sanitized_vuln(
         pattern: Pattern,
+        source_aps: Set[AccessPath],
         sanitized_aps: Set[AccessPath],
         sink_aps: Set[AccessPath]) -> Vulnerability:
     return Vulnerability(
-        pattern.vuln, list(), [
-            str(ap) for ap in sink_aps], [str(ap) for ap in sanitized_aps])
+        pattern.vuln, [ str(ap) for ap in source_aps], [ str(ap) for ap in sink_aps], [str(ap) for ap in sanitized_aps])
 
 
 def taint_analysis(
@@ -49,86 +49,63 @@ def taint_analysis(
         def analyze_expr(
                 stmt: Node,
                 pattern: Pattern,
-                taint_map: TaintMap,
-                sanitized_map: TaintMap) -> Iterable[Vulnerability]:
+                taint_map: TaintMap) -> Iterable[Vulnerability]:
 
             # a = sink(src)
             if stmt.type == 'AssignmentExpression':
                 for a in analyze_expr(
                         stmt['right'],
                         pattern,
-                        taint_map,
-                        sanitized_map):
+                        taint_map):
                     yield a
                 for a in analyze_expr(
                         stmt['left'],
                         pattern,
-                        taint_map,
-                        sanitized_map):
+                        taint_map):
                     yield a
 
                 lvalue_aps = stmt['left'].get_lvalue_aps()
                 usan_rvalue_aps = stmt['right'].get_usan_rvalue_aps(pattern)
                 san_rvalue_aps = stmt['right'].get_san_rvalue_aps(pattern)
-                sanitizers_aps = stmt['right'].get_rvalue_sanitizers(pattern)
-
-                rvalue_aps = usan_rvalue_aps | san_rvalue_aps
 
                 logger.debug(stmt)
                 logger.debug(
                     '\tlvalue aps = {} (sink? {})'.format(
                         lvalue_aps, any(
                             a.is_sink(pattern) for a in lvalue_aps)))
-                logger.debug(
-                    '\trvalue aps = {} (tainted? {}\tsanitized? {})'.format(
-                        rvalue_aps, any(
-                            taint_map.is_tainted(a) for a in rvalue_aps), any(
-                            sanitized_map.is_tainted(a) for a in rvalue_aps)))
+                logger.debug( '\tusan rvalue aps = {} (tainted? {}\tsanitized? {})'.format( usan_rvalue_aps, any( taint_map.is_tainted(a) for a in usan_rvalue_aps), any(taint_map.is_sanitized(a) for a in usan_rvalue_aps)))
 
-                if len(rvalue_aps) > 0:
-                    for ap in lvalue_aps:
-                        taint_map.register_assignment(
-                            ap, rvalue_aps, destructive=(
-                                stmt['operator'] == '='))
-                        sanitized_map.register_assignment(
-                            ap, rvalue_aps, destructive=(stmt['operator'] == '='))
+                for src, san in san_rvalue_aps:
+                    logger.debug( '\tsan rvalue aps = {}({}) (tainted? {})'.format(san, src, taint_map.is_tainted(src)))
 
-                    if stmt['operator'] == '=' or all(
-                            not taint_map.is_tainted(lval) for lval in lvalue_aps):
-                        if all(not taint_map.is_tainted(usan_rval)
-                               for usan_rval in rvalue_aps):
-                            for lval in lvalue_aps:
-                                taint_map.pop_taint(lval)
-                                sanitized_map.add_batch_taints(
-                                    lval, sanitizers_aps)
+                for ap in lvalue_aps:
+                    taint_map.register_assignment(
+                        ap, list(usan_rvalue_aps), list(san_rvalue_aps), destructive=(
+                            stmt['operator'] == '='))
 
-                    source_aps = set(sum(map(lambda x: taint_map[x], filter(
-                        lambda y: taint_map.is_tainted(y), lvalue_aps)), list()))
-                    sanitized_aps = set(sum(map(lambda x: sanitized_map[x], filter(
-                        lambda y: sanitized_map.is_tainted(y), lvalue_aps)), list()))
-                    sink_aps = set(
-                        filter(
-                            lambda x: x.is_sink(pattern),
-                            lvalue_aps))
+                source_aps = set(sum(map(lambda x: taint_map.taints[x], filter(
+                    lambda y: taint_map.is_tainted(y), lvalue_aps)), list()))
 
-                    if len(sink_aps) > 0 and len(source_aps) > 0:
+                sink_aps = set( filter( lambda x: x.is_sink(pattern), lvalue_aps))
+
+                if len(sink_aps) > 0:
+                    if len(source_aps) > 0:
                         yield gen_vuln(pattern, source_aps, sink_aps)
-                    elif len(sanitized_aps) > 0:
-                        if len(sink_aps) > 0:
-                            yield gen_sanitized_vuln(pattern, sanitized_aps, sink_aps)
+                    logger.debug('SANITIZED = {}'.format(taint_map.sanitized))
+                    for src, san in set(sum((taint_map.sanitized[ap] for ap in lvalue_aps), list())):
+                        yield gen_sanitized_vuln(pattern, {src}, {san}, sink_aps)
 
             elif stmt.type == 'CallExpression':
                 # only consider one level call, ie: all arguments are
                 # convertable to access paths or literals
                 for arg in stmt['arguments']:
                     for a in analyze_expr(
-                            arg, pattern, taint_map, sanitized_map):
+                            arg, pattern, taint_map):
                         yield a
                 for a in analyze_expr(
                         stmt['callee'],
                         pattern,
-                        taint_map,
-                        sanitized_map):
+                        taint_map):
                     yield a
 
                 callee_aps = stmt['callee'].get_rvalue_aps()
@@ -142,6 +119,7 @@ def taint_analysis(
                             a.is_source(pattern) for a in callee_aps), any(
                             a.is_sink(pattern) for a in callee_aps), any(
                             a.is_sanitizer(pattern) for a in callee_aps)))
+
                 for arg in args_aps:
                     logger.debug('\targ ap = {}  (source? {} sink? {} sanitizer? {})'.format(
                         arg, arg.is_source(pattern), arg.is_sink(pattern), arg.is_sanitizer(pattern)))
@@ -150,16 +128,21 @@ def taint_analysis(
                     filter(
                         lambda x: x.is_sink(pattern),
                         callee_aps))
-                source_aps = set(sum(map(lambda x: taint_map[x], filter(
+                source_aps = set(sum(map(lambda x: taint_map.taints[x], filter(
                     lambda y: taint_map.is_tainted(y), args_aps)), list()))
-                if len(sink_aps) > 0 and len(source_aps) > 0:
-                    yield gen_vuln(pattern, source_aps, sink_aps)
+                if len(sink_aps) > 0:
+                    if len(source_aps) > 0:
+                        yield gen_vuln(pattern, source_aps, sink_aps)
+
+                    logger.debug('SANITIZED = {}'.format(taint_map.sanitized))
+                    for src, san in set(sum((taint_map.sanitized[ap] for ap in args_aps), list())):
+                        yield gen_sanitized_vuln(pattern, {src}, {san}, sink_aps)
+
 
         if cg_node.node is None:
             return set()
 
-        taint_map = TaintMap(pattern.sources)
-        sanitized_map = TaintMap(pattern.sanitizers)
+        taint_map = TaintMap(pattern.sources, pattern.sanitizers)
 
         logger.debug('analyzing {}: {}'.format(cg_node.node, pattern))
 
@@ -171,7 +154,7 @@ def taint_analysis(
 
             stmt = stmt['expression']
             logger.debug('analyzing statement: {}'.format(stmt))
-            for v in analyze_expr(stmt, pattern, taint_map, sanitized_map):
+            for v in analyze_expr(stmt, pattern, taint_map):
                 vulns.add(v)
 
         return vulns

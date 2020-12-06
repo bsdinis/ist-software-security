@@ -4,7 +4,7 @@ ast.py
 convert json to an AST
 '''
 
-from typing import Any, Optional, Dict, List, Set
+from typing import Any, Optional, Dict, List, Set, Tuple
 from model import AccessPath, Pattern
 
 from functools import reduce
@@ -131,48 +131,35 @@ class Node:
 
         return set()
 
-    def get_san_rvalue_aps(self, pattern: Pattern) -> Set[AccessPath]:
+    def get_san_rvalue_aps(self, pattern: Pattern) -> Set[Tuple[AccessPath, AccessPath]]:
         if self.type in {'Identifier'}:
-            if self.name in pattern.sources:
-                return set()
-
-            return {self.ap()}
+            return set()
         elif self.type in {'CallExpression'}:
             if self['callee'].name in pattern.sanitizers:
-                return reduce(
+                return {(src, self['callee'].ap()) for src in reduce(
                     lambda x,
                     y: x | y,
                     (expr.get_aps() for expr in self['arguments']),
-                    self['callee'].get_rvalue_aps())
+                    self['callee'].get_rvalue_aps())}
             else:
                 return set()
 
         elif self.type in {'MemberExpression'}:
-            left = self['object'].get_rvalue_aps()
-            right = self['property'].get_rvalue_aps()
-
-            idents = set()
-            for l in left:
-                idents.add(l)
-                for r in right:
-                    idents.add(l + r)
-
-            return set(filter(lambda x: str(x) in pattern.sources, idents))
+            return set()
 
         elif self.type in {'UpdateExpression', 'UnaryExpression', 'SpreadElement'}:
-            return self['argument'].get_rvalue_aps()
+            return self['argument'].get_san_rvalue_aps(pattern)
         elif self.type in {'BinaryExpression', 'LogicalExpression'}:
-            return self['left'].get_rvalue_aps(
-            ) | self['right'].get_rvalue_aps()
+            return self['left'].get_san_rvalue_aps(pattern
+            ) | self['right'].get_san_rvalue_aps(pattern)
         elif self.type in {'ConditionalExpression'}:
             # TODO: implicit flows
-            return self['consequent'].get_rvalue_aps(
-            ) | self['alternate'].get_rvalue_aps()
+            return self['consequent'].get_san_rvalue_aps(pattern) | self['alternate'].get_san_rvalue_aps(pattern)
         elif self.type in {'SequenceExpression'}:
             if len(self['expressions']) == 0:
                 return set()
             else:
-                return self['expressions'][0].get_rvalue_aps()
+                return self['expressions'][0].get_san_rvalue_aps(pattern)
 
         return set()
 
@@ -217,7 +204,7 @@ class Node:
         return set()
 
     def get_usan_rvalue_aps(self, pattern: Pattern) -> Set[AccessPath]:
-        return self.get_rvalue_aps() - self.get_san_rvalue_aps(pattern)
+        return self.get_rvalue_aps() - set((src for src, san in self.get_san_rvalue_aps(pattern)))
 
     # TODO: Check for sinks and sanitizers on right side
     def get_tainted_sources(self,

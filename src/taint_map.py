@@ -5,7 +5,8 @@ organize taint maps
 '''
 
 from model import Pattern, AccessPath
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Set
+from functools import reduce
 
 import logging
 VERBOSE = False
@@ -15,88 +16,117 @@ logger.setLevel(level=logging.DEBUG if VERBOSE else logging.INFO)
 
 
 class TaintMap:
-    def __init__(self, original_taints: List[str]):
-        self._map: Dict[AccessPath, List[AccessPath]] = dict()
-        self._potential_map: Dict[AccessPath, List[AccessPath]] = dict()
-        self.sources = original_taints
-        for s in map(AccessPath.from_str, self.sources):
-            self._map[s] = [s]
-            self._potential_map[s] = []
+    def __init__(self, sources: List[str], sanitizers: List[str]):
+        self.taints: Dict[AccessPath, List[AccessPath]] = dict()
+        self.sanitized: Dict[AccessPath, List[Tuple[AccessPath, AccessPath]]] = dict()
+        self.alias: Dict[AccessPath, List[AccessPath]] = dict()
 
-    def __getitem__(self, ap: AccessPath) -> List[AccessPath]:
-        return self._map[ap]
+        self.sources = [AccessPath.from_str(s) for s in sources]
+        self.sanitizers = [AccessPath.from_str(s) for s in sanitizers]
+
+        for s in self.sources:
+            self.taints[s] = [s]
+            self.sanitized[s] = []
+            self.alias[s] = []
+        for s in self.sanitizers:
+            if s not in self.taints:
+                self.taints[s] = []
+                self.sanitized[s] = [s]
+                self.alias[s] = []
+            else:
+                self.sanitized[s] += [s]
+    @property
+    def keys(self):
+        assert self.taints.keys() == self.sanitized.keys() == self.alias.keys()
+        return self.taints.keys()
 
     def is_tainted(self, ap: AccessPath) -> bool:
-        return ap in self._map
+        return ap in self.keys and len(self.taints) > 0
 
-    def is_potential(self, ap: AccessPath) -> bool:
-        return any(ap < a for a in self._map) or ap in self._potential_map
+    def is_sanitized(self, ap: AccessPath) -> bool:
+        return ap in self.keys and len(self.taints) == 0
 
-    def generate_tainted(self, rvals: List[AccessPath]) -> List[AccessPath]:
-        tainted = list()
-        for rval in rvals:
-            if self.is_tainted(rval):
-                tainted.append(rval)
-            else:
-                for p in rval.prefixes():
-                    if self.is_tainted(p):
-                        tainted.append(p)
-                    elif self.is_potential(p):
-                        suff = rval.rem_prefix(p)
-                        if self.is_tainted(self._potential_map[p] + suff):
-                            tainted.append(self._potential_map[p] + suff)
+    def potentials(self, ap: AccessPath, l: List[AccessPath]) -> List[AccessPath]:
+        return list(filter(lambda x: x in self.keys and any(ap <= a for a in self.alias[x]), l))
 
-        return tainted
+    def create_alias(self, lval: AccessPath, rval: AccessPath) -> bool:
+        rpotentials = self.potentials(rval, self.sources + self.sanitizers)
+        lpotentials = self.potentials(lval, self.sources + self.sanitizers)
+        if rval in self.keys:
+            self.taints[lval], self.sanitized[lval], self.alias[lval] = self.taints[rval], self.sanitized[rval], self.alias[rval]
+        elif rval in self.sources:
+            self.taints[lval] = [rval]
+            self.sanitized[lval] = []
+            self.alias[lval] = []
+        elif len(rpotentials) > 0:
+            self.taints[lval] = []
+            self.sanitized[lval] = []
+            self.alias[lval] = rpotentials
+        else:
+            return False
 
-    def pop_taint(self,
-                  ap: AccessPath) -> Tuple[List[AccessPath],
-                                           List[AccessPath]]:
-        if not self.is_tainted(ap):
-            return list(), list()
+        for p in lpotentials:
+            if p in self.sources: self.sources.remove(p)
+            if p in self.sanitizers: self.sanitizers.remove(p)
 
-        taint = self[ap]
-        possible = self._potential_map[ap]
-        del(self._map[ap])
-        del(self._potential_map[ap])
+        return True
 
-        return taint, possible
+    def get_taints(self, rvals: List[AccessPath]) -> List[AccessPath]:
+        prop_taints: Set[AccessPath] = reduce(lambda a,b: a|b, map(lambda x: set(self.taints[x]) if x in self.keys else set(), rvals), set())
+        orig_taints: Set[AccessPath] = reduce(lambda a,b: a|b, map(lambda x: set(self.potentials(x, rvals)), self.sources), set())
+        return list(prop_taints | orig_taints)
 
     def register_assignment(
             self,
             lval: AccessPath,
-            rval: List[AccessPath],
+            usan_rval: List[AccessPath], #
+            san_rval: List[Tuple[AccessPath, AccessPath]], #
             destructive: bool = True):
+
+        rval = usan_rval + [x[0] for x in san_rval]
         logger.debug('{} = {} ({})'.format(lval, rval, destructive))
-        tainted_rvals = self.generate_tainted(rval)
-        possible_rvals = list(filter(lambda x: self.is_potential(x), rval))
 
-        if len(tainted_rvals) == 0:
-            self.pop_taint(lval)
+        if destructive:
+            if len(rval) == 0:
+                if lval in self.sources: self.sources.remove(lval)
+                if lval in self.sanitizers: self.sanitizers.remove(lval)
+                if lval in self.keys:
+                    self.alias[lval] = []
+                    self.taints[lval] = []
+                    self.sanitized[lval] = []
 
-        if destructive or lval not in self._map:
-            self._map[lval] = list()
-            self._potential_map[lval] = list()
+            elif len(rval) == 1:
+                if self.create_alias(lval, rval[0]):
+                    return
 
-        for r in tainted_rvals:
-            for tainted_src in self[r]:
-                logger.debug('inserting {} -> {}'.format(lval, r))
-                self._map[lval].append(tainted_src)
+        tainted = self.get_taints(usan_rval)
+        possibly_tainted = self.get_taints(rval)
+        if len(tainted) == 0 and (self.is_tainted(lval) or len(possibly_tainted) > 0):
+            if lval not in self.keys:
+                self.taints[lval] = list()
+                self.sanitized[lval] = list()
+                self.alias[lval] = list()
 
-        for p in possible_rvals:
-            for possible_src in self[p]:
-                self._potential_map[lval].append(possible_src)
+            for src, san in san_rval:
+                logger.debug('{}'.format((src, san)))
+                if src in self.taints:
+                    for s in self.taints[src]:
+                        self.sanitized[lval].append((s, san))
+                elif src in self.sources:
+                    self.sanitized[lval].append((src, san))
 
-        if len(self._map[lval]) == 0:
-            del(self._map[lval])
-        if len(self._potential_map[lval]) == 0:
-            del(self._potential_map[lval])
 
-    def add_batch_taints(
-            self,
-            ap: AccessPath,
-            sanitizers_aps: List[AccessPath]):
-        if ap not in self._map:
-            self._map[ap] = list()
+        elif len(tainted) > 0:
+            if lval not in self.keys:
+                self.taints[lval] = list()
+                self.sanitized[lval] = list()
+                self.alias[lval] = list()
 
-        for s in sanitizers_aps:
-            self._map[ap].append(ap)
+            self.taints[lval] += tainted
+            self.taints[lval] = list(set(self.taints[lval]))
+
+        if destructive:
+            potentials = self.potentials(lval, self.sources + self.sanitizers)
+            for p in potentials:
+                if p in self.sources: self.sources.remove(p)
+                if p in self.sanitizers: self.sanitizers.remove(p)
