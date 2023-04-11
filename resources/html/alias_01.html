@@ -1,0 +1,32 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This contains an exploit that is accessed via an alias
+-->
+<html>
+<head>
+<title>Welcome!</title>
+</head>
+
+<body>
+Hi
+
+<script>
+
+function A() {}
+var a = new A();
+a.f = "safe";
+var b = a;
+b.f = document.URL;
+
+document.write(a.f);
+
+</script>
+
+<br>
+Welcome to our system
+
+</body>
+
+</html>

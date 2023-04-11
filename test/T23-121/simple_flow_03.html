@@ -1,0 +1,28 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to DOM XSS.
+It contains a very simple code with an document.URL as a source and document.write as a sink while going through substring. -->
+
+<HTML>
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+<body>
+Hi
+
+<SCRIPT>
+
+var t = document.URL;
+
+var bar = t.substring(0, 10);
+
+document.write(bar);
+
+</SCRIPT>
+
+<BR>
+Welcome to our system
+</body>
+</HTML>

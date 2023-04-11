@@ -1,0 +1,51 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to DOM XSS. 
+
+SOURCE:
+    XHR.getAllResponseHeaders [ret]
+    
+SINK:
+    document.location.search 
+-->
+<HTML>
+
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+
+<body>
+Hi
+
+<SCRIPT>
+function ajax()
+{
+	if (window.XMLHttpRequest)
+	  {// code for IE7+, Firefox, Chrome, Opera, Safari
+	  xmlhttp=new XMLHttpRequest();
+	  }
+	else
+	  {// code for IE6, IE5
+	  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	  }
+      
+	xmlhttp.onreadystatechange=function()
+	  {
+	  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+	    {
+	    document.location.search = xmlhttp.getAllResponseHeaders();
+	    }
+	  }
+	xmlhttp.open("GET","www.example.com",true);
+	xmlhttp.send();
+}
+</SCRIPT>
+
+<BR>
+Welcome to our system
+<input type="button" onclick="ajax()" value="Question?" />
+<div id="test"></div>
+</body>
+</HTML>

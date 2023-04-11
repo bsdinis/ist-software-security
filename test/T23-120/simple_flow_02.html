@@ -1,0 +1,28 @@
+<!-- 0 -->
+<!-- 
+NOTE:
+=======
+This HTML code is NOT vulnerable to DOM XSS.
+-->
+
+<HTML>
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+<body>
+Hi
+
+<SCRIPT>
+
+var t = document.location.toString();
+
+var safe = encodeURIComponent(t);
+
+document.write(safe);
+
+</SCRIPT>
+
+<BR>
+Welcome to our system
+</body>
+</HTML>

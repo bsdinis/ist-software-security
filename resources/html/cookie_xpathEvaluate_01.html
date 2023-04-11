@@ -1,0 +1,35 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to DOM XPath injection. 
+
+SOURCE:
+    document.cookie [ret]
+    
+SINK:
+    document.evaluate [arg#2]
+-->
+<HTML>
+
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+
+<body>
+Hi
+
+<SCRIPT>
+function domxpath()
+{
+    var c = document.cookie;
+    var paragraphCount = document.evaluate( 'count(//'+c+')', document, null, XPathResult.ANY_TYPE, null );  
+}
+</SCRIPT>
+
+<BR>
+Welcome to our system
+<input type="button" onclick="domxpath()" value="Question?" />
+<div id="test"></div>
+</body>
+</HTML>

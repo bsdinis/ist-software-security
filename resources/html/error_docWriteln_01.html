@@ -1,0 +1,40 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to DOM XSS. 
+
+SOURCE:
+    Error.message [ret]
+    
+SINK:
+    document.writeln [Arg#2] 
+ -->
+<HTML>
+
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+
+<body>
+Hi
+
+<SCRIPT>
+function err()
+{
+    try{
+    	throw new Error("Error");
+        // Actually a real world example would look more like this:
+        //throw new Error("Error"+document.URL.toString());
+    }catch(e){
+        document.writeln("Error: " + e.message);
+    }          
+}
+</SCRIPT>
+
+<BR>
+Welcome to our system
+<input type="button" onclick="err()" value="Question?" />
+<div id="test"></div>
+</body>
+</HTML>

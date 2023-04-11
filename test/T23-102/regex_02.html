@@ -1,0 +1,19 @@
+<!--  0 -->
+<html>
+<head><title>JS</title></head>
+<body>
+<script type="text/javascript">
+var k = "<hello>";
+k.replace(/\\/g,'\\\\');
+k.replace(/\n/g,'\\n');
+k.replace(/\r/g,'\\r');
+k.replace(/"/g,'\\x22');
+k.replace(/'/g,'\\\'');
+k.replace(/</g,'\\x3c');
+k.replace(/>/g,'\\x3e');
+k.replace(/&/g,'\\x26');
+document.write(k);
+</script>
+</body>
+</html>
+

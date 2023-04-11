@@ -1,0 +1,34 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This overwrites a sanitizer which is a bad thing to do -->
+
+<HTML>
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+<body>
+Hi
+
+<SCRIPT>
+
+var t = document.URL;
+
+function k() {
+    encodeURI = function (str) { return str; }
+}
+
+k();
+
+var u = encodeURI(t);
+
+document.write(u);
+
+</SCRIPT>
+
+<BR>
+Welcome to our system
+</body>
+
+</HTML>

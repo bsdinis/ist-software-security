@@ -1,0 +1,25 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This contains an exploit that is accessed via an alias to document.write
+-->
+<HTML>
+
+<TITLE>Welcome!</TITLE>
+
+Hi
+
+<SCRIPT>
+
+var t = document.URL;
+var f = "write";
+var k = document[f];
+k(t);
+
+</SCRIPT>
+
+<BR>
+Welcome to our system
+
+</HTML>

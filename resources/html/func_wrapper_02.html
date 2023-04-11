@@ -1,0 +1,32 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to DOM XSS.
+It contains a simple code with an document.URL as a source and document.writeln as a sink.
+The vulnerable function (presentText) is called by another function(firstFunc) which in turn originates 
+from a call located at a SCRIPT segment in the body of the HTML.
+-->
+<html>
+<head>
+<script>
+function firstFunc(str) {
+	presentText(str+" [appended text]");
+}
+
+function presentText(txt) {
+	document.write(txt);
+}
+</script>
+</head>
+<body>
+Hello world!
+<br>
+<script>
+	var txt = document.URL;
+	firstFunc(txt);
+</script>
+<br>
+Goodbye.
+</body>
+</html>

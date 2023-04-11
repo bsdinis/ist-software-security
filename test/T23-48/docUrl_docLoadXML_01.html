@@ -1,0 +1,36 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to XML injection (bad vuln name?). 
+
+SOURCE:
+    document.URL [ret]
+    
+SINK:
+    ActiveXObject.loadXML [arg#2]
+-->
+<HTML>
+
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+
+<body>
+Hi
+
+<SCRIPT>
+function domxpath()
+{
+	xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
+	xmlDoc.async="false";
+	xmlDoc.loadXML(document.URL);
+}
+</SCRIPT>
+
+<BR>
+Welcome to our system
+<input type="button" onclick="domxpath()" value="Question?" />
+<div id="test"></div>
+</body>
+</HTML>

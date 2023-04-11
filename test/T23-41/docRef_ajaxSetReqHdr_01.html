@@ -1,0 +1,37 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to HTTP Response Splitting. 
+
+SOURCE:
+    document.referrer.toString() [ret]
+    
+SINK:
+    XHR.setRequestHeader() [Arg#3] 
+-->
+<HTML>
+
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+
+<body>
+Hi
+
+<SCRIPT>
+function ajax()
+{
+    var xmlhttp = new XMLHttpRequest();
+	xmlhttp.open("POST","ajax_test.asp",true);
+	xmlhttp.setRequestHeader("Content-type",document.referrer.toString());
+	xmlhttp.send();
+}
+</SCRIPT>
+
+<BR>
+Welcome to our system
+<input type="button" onclick="ajax()" value="Question?" />
+<div id="test"></div>
+</body>
+</HTML>

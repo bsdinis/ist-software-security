@@ -1,0 +1,35 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+-->
+<HTML>
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+
+<body>
+Hi
+
+<SCRIPT>
+
+function foo(b) {
+	var a = new Object();
+	var x;
+	var y;
+	x = "ABCDEF".substring(1, 2);
+	y = 1 + 1;
+	a["prop_name"] = document.URL;
+	b[x] = a;
+	b[y] = "Hello";
+	document.write(b["B"]["prop_name"]);
+}
+
+var t = new Object();
+foo(t);
+</SCRIPT>
+
+<BR>
+Welcome to our system
+</body>
+</HTML>

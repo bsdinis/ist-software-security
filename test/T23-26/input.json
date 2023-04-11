@@ -1,0 +1,1 @@
+{"type": "Program", "sourceType": "script", "body": [{"type": "VariableDeclaration", "declarations": [{"type": "VariableDeclarator", "id": {"type": "Identifier", "name": "k"}, "init": {"type": "Literal", "value": 100, "raw": "100"}}], "kind": "var"}]}

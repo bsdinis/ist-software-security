@@ -1,0 +1,30 @@
+<!-- 0 -->
+<!-- 
+NOTE:
+=======
+This HTML code is not vulnerable to Regex injection. 
+-->
+<HTML>
+
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+
+<body>
+Hi
+
+<SCRIPT>
+function regex()
+{
+    // This is another way of creating a RegExp object without explicitly using "new" as in "new RegExp('', '');" 
+    var txt = /document.location.search/g;
+    document.writeln(txt);
+}
+</SCRIPT>
+
+<BR>
+Welcome to our system
+<input type="button" onclick="regex()" value="Question?" />
+<div id="test"></div>
+</body>
+</HTML>

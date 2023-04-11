@@ -1,0 +1,25 @@
+<!-- 1 -->
+<!-- 
+NOTE:
+=======
+This HTML code is vulnerable to DOM XSS.
+It contains a simple code with an document.URL as a source and document.writeln as a sink.
+The vulnerable function (vulnFunc) is called from a SCRIPT segment in the body of the HTML.
+-->
+<html>
+<head>
+<script>
+function vulnFunc(str) {
+	document.write(str);
+}
+</script>
+</head>
+<body>
+Hello world!
+<br>
+<script>
+	vulnFunc(document.URL);
+</script>
+Goodbye.
+</body>
+</html>

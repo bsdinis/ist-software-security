@@ -1,0 +1,1 @@
+[{"vulnerability": "Bad things happen", "source": ["a"], "sink": ["z"], "sanitizer": ["t"]}]

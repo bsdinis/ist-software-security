@@ -1,0 +1,20 @@
+<!-- 0 -->
+<!-- This tests property reads --- [0] is a property read just like ["hello"] would be a property read -->
+<HTML>
+<head>
+<TITLE>Welcome!</TITLE>
+</head>
+<body>
+Hi
+
+<SCRIPT>
+
+var titleNode = document.getElementsByTagName("title")[0];
+var titleText = titleNode.childNodes[0].nodeValue;
+document.write(titleText);
+</SCRIPT>
+
+<BR>
+Welcome to our system
+</body>
+</HTML>
